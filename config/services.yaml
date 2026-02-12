@@ -2,15 +2,17 @@ parameters:
 
 services:
     _defaults:
-        autowire: true      
-        autoconfigure: true 
-
+        autowire: true
+        autoconfigure: true
 
     App\:
         resource: '../src/'
         exclude:
             - '../src/DependencyInjection/'
             - '../src/Domain/'
+            - '../src/Application/'   
+            - '../src/Infrastructure/'   
+            - '../src/UI/'           
             - '../src/Kernel.php'
 
     Domain\:
@@ -24,6 +26,7 @@ services:
 
     UI\:
         resource: '../src/UI/'
+
 
     Domain\Identity\Repository\UserRepositoryInterface:
         alias: Infrastructure\Doctrine\Repository\UserRepository

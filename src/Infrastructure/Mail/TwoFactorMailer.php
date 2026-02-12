@@ -21,7 +21,7 @@ final readonly class TwoFactorMailer
         // le to doit être dynamique (->to($recipientEmail)) mais pour les tests on peut le laisser en dur sur une adresse de test
         $email = (new Email())
             ->from($this->fromEmail)
-            ->to('coviko6580@2insp.com') // remplacer par $recipientEmail en production
+            ->to($recipientEmail) // remplacer par $recipientEmail en production // en test mettre une adresse de test
             ->subject('Votre Code de vérification - MMM')
             ->html($this->renderEmailTemplate($twoFactorCode));
 
