@@ -4,24 +4,47 @@ declare(strict_types=1);
 
 namespace Domain\Identity\Entity;
 
+use Doctrine\ORM\Mapping as ORM;
 use Domain\Identity\Exception\UserBlockedException;
 use Symfony\Component\Uid\Uuid;
 
-final class User
+#[ORM\Entity]
+#[ORM\Table(name: 'users')]
+class User
 {
     private const MAX_FAILED_ATTEMPTS = 5;
     private const BLOCK_DURATION_MINUTES = 15;
 
+    #[ORM\Id]
+    #[ORM\Column(type: 'uuid', unique: true)]
+    private Uuid $id;
+
+    #[ORM\Column(type: 'string', length: 180, unique: true)]
+    private string $email;
+
+    #[ORM\Column(name: 'password_hash', type: 'string', length: 255)]
+    private string $passwordHash;
+
+    #[ORM\Column(name: 'failed_login_attempts', type: 'integer')]
     private int $failedLoginAttempts = 0;
+
+    #[ORM\Column(name: 'blocked_until', type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $blockedUntil = null;
+
+    #[ORM\Column(name: 'created_at', type: 'datetime_immutable')]
     private \DateTimeImmutable $createdAt;
+
+    #[ORM\Column(name: 'updated_at', type: 'datetime_immutable')]
     private \DateTimeImmutable $updatedAt;
 
     public function __construct(
-        private readonly Uuid $id,
-        private string $email,
-        private string $passwordHash,
+        Uuid $id,
+        string $email,
+        string $passwordHash,
     ) {
+        $this->id = $id;
+        $this->email = $email;
+        $this->passwordHash = $passwordHash;
         $this->createdAt = new \DateTimeImmutable();
         $this->updatedAt = new \DateTimeImmutable();
     }

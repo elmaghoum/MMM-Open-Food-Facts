@@ -4,18 +4,39 @@ declare(strict_types=1);
 
 namespace Domain\Identity\Entity;
 
+use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Uid\Uuid;
 
-final class LoginAttempt
+#[ORM\Entity]
+#[ORM\Table(name: 'login_attempts')]
+class LoginAttempt
 {
+    #[ORM\Id]
+    #[ORM\Column(type: 'uuid', unique: true)]
+    private Uuid $id;
+
+    #[ORM\Column(type: 'string', length: 180)]
+    private string $email;
+
+    #[ORM\Column(type: 'boolean')]
+    private bool $success;
+
+    #[ORM\Column(name: 'ip_address', type: 'string', length: 45)]
+    private string $ipAddress;
+
+    #[ORM\Column(name: 'attempted_at', type: 'datetime_immutable')]
     private \DateTimeImmutable $attemptedAt;
 
     private function __construct(
-        private readonly Uuid $id,
-        private readonly string $email,
-        private readonly bool $success,
-        private readonly string $ipAddress,
+        Uuid $id,
+        string $email,
+        bool $success,
+        string $ipAddress,
     ) {
+        $this->id = $id;
+        $this->email = $email;
+        $this->success = $success;
+        $this->ipAddress = $ipAddress;
         $this->attemptedAt = new \DateTimeImmutable();
     }
 

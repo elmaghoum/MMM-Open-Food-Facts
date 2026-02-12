@@ -4,24 +4,49 @@ declare(strict_types=1);
 
 namespace Domain\Identity\Entity;
 
+use Doctrine\ORM\Mapping as ORM;
 use Domain\Identity\Exception\TwoFactorCodeAlreadyUsedException;
 use Domain\Identity\Exception\TwoFactorCodeExpiredException;
 use Symfony\Component\Uid\Uuid;
 
-final class TwoFactorCode
+#[ORM\Entity]
+#[ORM\Table(name: 'two_factor_codes')]
+class TwoFactorCode
 {
     private const EXPIRATION_MINUTES = 10;
     private const CODE_LENGTH = 6;
 
+    #[ORM\Id]
+    #[ORM\Column(type: 'uuid', unique: true)]
+    private Uuid $id;
+
+    #[ORM\Column(name: 'user_id', type: 'uuid')]
+    private Uuid $userId;
+
+    #[ORM\Column(type: 'string', length: 10)]
+    private string $code;
+
+    #[ORM\Column(name: 'expires_at', type: 'datetime_immutable')]
+    private \DateTimeImmutable $expiresAt;
+
+    #[ORM\Column(name: 'used_at', type: 'datetime_immutable', nullable: true)]
+    private ?\DateTimeImmutable $usedAt;
+
+    #[ORM\Column(name: 'created_at', type: 'datetime_immutable')]
     private \DateTimeImmutable $createdAt;
 
     private function __construct(
-        private readonly Uuid $id,
-        private readonly Uuid $userId,
-        private readonly string $code,
-        private readonly \DateTimeImmutable $expiresAt,
-        private ?\DateTimeImmutable $usedAt = null,
+        Uuid $id,
+        Uuid $userId,
+        string $code,
+        \DateTimeImmutable $expiresAt,
+        ?\DateTimeImmutable $usedAt = null,
     ) {
+        $this->id = $id;
+        $this->userId = $userId;
+        $this->code = $code;
+        $this->expiresAt = $expiresAt;
+        $this->usedAt = $usedAt;
         $this->createdAt = new \DateTimeImmutable();
     }
 

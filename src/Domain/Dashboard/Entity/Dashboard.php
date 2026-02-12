@@ -4,23 +4,42 @@ declare(strict_types=1);
 
 namespace Domain\Dashboard\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\Mapping as ORM;
 use Domain\Dashboard\Exception\WidgetNotFoundException;
 use Domain\Dashboard\Exception\WidgetPositionAlreadyOccupiedException;
 use Domain\Dashboard\ValueObject\WidgetPosition;
 use Domain\Dashboard\ValueObject\WidgetType;
 use Symfony\Component\Uid\Uuid;
 
-final class Dashboard
+#[ORM\Entity]
+#[ORM\Table(name: 'dashboards')]
+class Dashboard
 {
-    /** @var Widget[] */
-    private array $widgets = [];
+    #[ORM\Id]
+    #[ORM\Column(type: 'uuid', unique: true)]
+    private Uuid $id;
+
+    #[ORM\Column(name: 'user_id', type: 'uuid', unique: true)]
+    private Uuid $userId;
+
+    #[ORM\OneToMany(targetEntity: Widget::class, mappedBy: 'dashboard', cascade: ['persist', 'remove'], orphanRemoval: true)]
+    private Collection $widgets;
+
+    #[ORM\Column(name: 'created_at', type: 'datetime_immutable')]
     private \DateTimeImmutable $createdAt;
+
+    #[ORM\Column(name: 'updated_at', type: 'datetime_immutable')]
     private \DateTimeImmutable $updatedAt;
 
     private function __construct(
-        private readonly Uuid $id,
-        private readonly Uuid $userId,
+        Uuid $id,
+        Uuid $userId,
     ) {
+        $this->id = $id;
+        $this->userId = $userId;
+        $this->widgets = new ArrayCollection();
         $this->createdAt = new \DateTimeImmutable();
         $this->updatedAt = new \DateTimeImmutable();
     }
@@ -48,7 +67,7 @@ final class Dashboard
      */
     public function getWidgets(): array
     {
-        return array_values($this->widgets);
+        return $this->widgets->toArray();
     }
 
     public function addWidget(
@@ -62,14 +81,14 @@ final class Dashboard
 
         $widget = new Widget(
             id: Uuid::v4(),
-            dashboardId: $this->id,
+            dashboard: $this,
             type: $type,
             row: $row,
             column: $column,
             configuration: $configuration,
         );
 
-        $this->widgets[$widget->getId()->toRfc4122()] = $widget;
+        $this->widgets->add($widget);
         $this->updatedAt = new \DateTimeImmutable();
 
         return $widget;
@@ -77,28 +96,25 @@ final class Dashboard
 
     public function removeWidget(Uuid $widgetId): void
     {
-        $key = $widgetId->toRfc4122();
+        $widget = $this->findWidget($widgetId);
         
-        if (!isset($this->widgets[$key])) {
+        if (!$widget) {
             throw WidgetNotFoundException::withId($widgetId);
         }
 
-        unset($this->widgets[$key]);
+        $this->widgets->removeElement($widget);
         $this->updatedAt = new \DateTimeImmutable();
     }
 
     public function moveWidget(Uuid $widgetId, int $newRow, int $newColumn): void
     {
-        $key = $widgetId->toRfc4122();
+        $widget = $this->findWidget($widgetId);
         
-        if (!isset($this->widgets[$key])) {
+        if (!$widget) {
             throw WidgetNotFoundException::withId($widgetId);
         }
 
-        $widget = $this->widgets[$key];
         $newPosition = WidgetPosition::at($newRow, $newColumn);
-
-        // Vérifier que la nouvelle position n'est pas occupée (sauf par le widget lui-même)
         $this->ensurePositionIsAvailable($newPosition, $widgetId);
 
         $widget->moveTo($newRow, $newColumn);
@@ -116,6 +132,16 @@ final class Dashboard
                 throw WidgetPositionAlreadyOccupiedException::at($position->row, $position->column);
             }
         }
+    }
+
+    private function findWidget(Uuid $widgetId): ?Widget
+    {
+        foreach ($this->widgets as $widget) {
+            if ($widget->getId()->equals($widgetId)) {
+                return $widget;
+            }
+        }
+        return null;
     }
 
     public function getCreatedAt(): \DateTimeImmutable
