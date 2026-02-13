@@ -8,9 +8,13 @@ use Application\Identity\Command\LoginUserCommand;
 use Application\Identity\DTO\LoginResult;
 use Domain\Identity\Entity\LoginAttempt;
 use Domain\Identity\Entity\TwoFactorCode;
+use Domain\Identity\Event\LoginFailureEvent;
+use Domain\Identity\Event\LoginSuccessEvent;
+use Domain\Identity\Event\TwoFactorCodeGeneratedEvent;
 use Domain\Identity\Repository\LoginAttemptRepositoryInterface;
 use Domain\Identity\Repository\TwoFactorCodeRepositoryInterface;
 use Domain\Identity\Repository\UserRepositoryInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 final readonly class LoginUserHandler
 {
@@ -18,6 +22,7 @@ final readonly class LoginUserHandler
         private UserRepositoryInterface $userRepository,
         private TwoFactorCodeRepositoryInterface $twoFactorCodeRepository,
         private LoginAttemptRepositoryInterface $loginAttemptRepository,
+        private EventDispatcherInterface $eventDispatcher,
     ) {
     }
 
@@ -27,13 +32,15 @@ final readonly class LoginUserHandler
 
         // User n'existe pas
         if (!$user) {
-            $this->recordFailedAttempt($command->email, $command->ipAddress);
+            $this->recordFailedAttempt($command->email, $command->ipAddress, 'User not found');
+            $this->dispatchFailureEvent($command->email, $command->ipAddress, 'Invalid credentials');
             return LoginResult::failure('Invalid credentials');
         }
 
         // Vérifier si le compte est bloqué
         if ($user->isBlocked()) {
-            $this->recordFailedAttempt($command->email, $command->ipAddress);
+            $this->recordFailedAttempt($command->email, $command->ipAddress, 'Account blocked');
+            $this->dispatchFailureEvent($command->email, $command->ipAddress, 'Account is temporarily blocked');
             return LoginResult::failure('Account is temporarily blocked');
         }
 
@@ -41,7 +48,8 @@ final readonly class LoginUserHandler
         if (!password_verify($command->password, $user->getPasswordHash())) {
             $user->recordFailedLogin();
             $this->userRepository->save($user);
-            $this->recordFailedAttempt($command->email, $command->ipAddress);
+            $this->recordFailedAttempt($command->email, $command->ipAddress, 'Invalid password');
+            $this->dispatchFailureEvent($command->email, $command->ipAddress, 'Invalid credentials');
             return LoginResult::failure('Invalid credentials');
         }
 
@@ -52,10 +60,14 @@ final readonly class LoginUserHandler
         $this->userRepository->save($user);
         $this->recordSuccessAttempt($command->email, $command->ipAddress);
 
+        // Dispatcher les events
+        $this->dispatchSuccessEvent($user->getId(), $command->email, $command->ipAddress);
+        $this->dispatchTwoFactorCodeEvent($command->email, $twoFactorCode);
+
         return LoginResult::success($user->getId(), $twoFactorCode);
     }
 
-    private function recordFailedAttempt(string $email, string $ipAddress): void
+    private function recordFailedAttempt(string $email, string $ipAddress, string $reason): void
     {
         $attempt = LoginAttempt::recordFailure($email, $ipAddress);
         $this->loginAttemptRepository->save($attempt);
@@ -65,5 +77,26 @@ final readonly class LoginUserHandler
     {
         $attempt = LoginAttempt::recordSuccess($email, $ipAddress);
         $this->loginAttemptRepository->save($attempt);
+    }
+
+    private function dispatchSuccessEvent(\Symfony\Component\Uid\Uuid $userId, string $email, string $ipAddress): void
+    {
+        $this->eventDispatcher->dispatch(
+            new LoginSuccessEvent($userId, $email, $ipAddress)
+        );
+    }
+
+    private function dispatchFailureEvent(string $email, string $ipAddress, string $reason): void
+    {
+        $this->eventDispatcher->dispatch(
+            new LoginFailureEvent($email, $ipAddress, $reason)
+        );
+    }
+
+    private function dispatchTwoFactorCodeEvent(string $email, TwoFactorCode $twoFactorCode): void
+    {
+        $this->eventDispatcher->dispatch(
+            new TwoFactorCodeGeneratedEvent($email, $twoFactorCode)
+        );
     }
 }

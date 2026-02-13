@@ -5,29 +5,39 @@ services:
         autowire: true
         autoconfigure: true
 
+    # App namespace (fallback)
     App\:
         resource: '../src/'
         exclude:
             - '../src/DependencyInjection/'
             - '../src/Domain/'
-            - '../src/Application/'   
-            - '../src/Infrastructure/'   
-            - '../src/UI/'           
+            - '../src/Application/'
+            - '../src/Infrastructure/'
+            - '../src/UI/'
             - '../src/Kernel.php'
 
+    # Domain layer
     Domain\:
         resource: '../src/Domain/'
 
+    # Application layer
     Application\:
         resource: '../src/Application/'
 
+    # Infrastructure layer
     Infrastructure\:
         resource: '../src/Infrastructure/'
 
+    # UI layer (Controllers)
     UI\:
         resource: '../src/UI/'
 
+    # Controllers avec tag spécifique
+    UI\Controller\:
+        resource: '../src/UI/Controller/'
+        tags: ['controller.service_arguments']
 
+    # Repository bindings
     Domain\Identity\Repository\UserRepositoryInterface:
         alias: Infrastructure\Doctrine\Repository\UserRepository
 

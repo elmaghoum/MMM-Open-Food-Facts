@@ -11,21 +11,16 @@ use Domain\Identity\Entity\TwoFactorCode;
 use Domain\Identity\Repository\UserRepositoryInterface;
 use Domain\Identity\Repository\TwoFactorCodeRepositoryInterface;
 use Domain\Identity\Repository\LoginAttemptRepositoryInterface;
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Uid\Uuid;
 
 final class LoginUserHandlerTest extends TestCase
 {
-    /** @var UserRepositoryInterface&MockObject */
-    private $userRepository;
-
-    /** @var TwoFactorCodeRepositoryInterface&MockObject */
-    private $twoFactorCodeRepository;
-
-    /** @var LoginAttemptRepositoryInterface&MockObject */
-    private $loginAttemptRepository;
-
+    private UserRepositoryInterface $userRepository;
+    private TwoFactorCodeRepositoryInterface $twoFactorCodeRepository;
+    private LoginAttemptRepositoryInterface $loginAttemptRepository;
+    private EventDispatcherInterface $eventDispatcher;
     private LoginUserHandler $handler;
 
     protected function setUp(): void
@@ -33,22 +28,20 @@ final class LoginUserHandlerTest extends TestCase
         $this->userRepository = $this->createMock(UserRepositoryInterface::class);
         $this->twoFactorCodeRepository = $this->createMock(TwoFactorCodeRepositoryInterface::class);
         $this->loginAttemptRepository = $this->createMock(LoginAttemptRepositoryInterface::class);
+        $this->eventDispatcher = $this->createMock(EventDispatcherInterface::class);
 
         $this->handler = new LoginUserHandler(
             $this->userRepository,
             $this->twoFactorCodeRepository,
-            $this->loginAttemptRepository
+            $this->loginAttemptRepository,
+            $this->eventDispatcher
         );
     }
 
     public function testSuccessfulLoginGenerates2FACode(): void
     {
-        $user = new User(
-            Uuid::v4(),
-            'test@example.com',
-            password_hash('password123', PASSWORD_BCRYPT)
-        );
-
+        $user = new User(Uuid::v4(), 'test@example.com', password_hash('password123', PASSWORD_BCRYPT));
+        
         $this->userRepository
             ->expects($this->once())
             ->method('findByEmail')
@@ -69,12 +62,12 @@ final class LoginUserHandlerTest extends TestCase
             ->expects($this->once())
             ->method('save');
 
-        $command = new LoginUserCommand(
-            'test@example.com',
-            'password123',
-            '127.0.0.1'
-        );
+        // Vérifier que les events sont dispatched
+        $this->eventDispatcher
+            ->expects($this->exactly(2))
+            ->method('dispatch');
 
+        $command = new LoginUserCommand('test@example.com', 'password123', '127.0.0.1');
         $result = $this->handler->handle($command);
 
         $this->assertTrue($result->isSuccess());
@@ -83,12 +76,8 @@ final class LoginUserHandlerTest extends TestCase
 
     public function testFailedLoginIncrementsAttempts(): void
     {
-        $user = new User(
-            Uuid::v4(),
-            'test@example.com',
-            password_hash('password123', PASSWORD_BCRYPT)
-        );
-
+        $user = new User(Uuid::v4(), 'test@example.com', password_hash('password123', PASSWORD_BCRYPT));
+        
         $this->userRepository
             ->expects($this->once())
             ->method('findByEmail')
@@ -99,35 +88,27 @@ final class LoginUserHandlerTest extends TestCase
             ->method('save')
             ->with($user);
 
-        $this->twoFactorCodeRepository
-            ->expects($this->never())
-            ->method('save');
-
         $this->loginAttemptRepository
             ->expects($this->once())
             ->method('save');
 
-        $command = new LoginUserCommand(
-            'test@example.com',
-            'wrong_password',
-            '127.0.0.1'
-        );
+        // Event de failure dispatché
+        $this->eventDispatcher
+            ->expects($this->once())
+            ->method('dispatch');
 
+        $command = new LoginUserCommand('test@example.com', 'wrong_password', '127.0.0.1');
         $result = $this->handler->handle($command);
 
         $this->assertFalse($result->isSuccess());
-        $this->assertSame(1, $user->getFailedLoginAttempts());
+        $this->assertEquals(1, $user->getFailedLoginAttempts());
     }
 
     public function testBlockedUserCannotLogin(): void
     {
-        $user = new User(
-            Uuid::v4(),
-            'test@example.com',
-            password_hash('password123', PASSWORD_BCRYPT)
-        );
-
-        // Simule un blocage (ex: 5 tentatives échouées)
+        $user = new User(Uuid::v4(), 'test@example.com', password_hash('password123', PASSWORD_BCRYPT));
+        
+        // Bloquer le compte
         for ($i = 0; $i < 5; $i++) {
             $user->recordFailedLogin();
         }
@@ -137,28 +118,20 @@ final class LoginUserHandlerTest extends TestCase
             ->method('findByEmail')
             ->willReturn($user);
 
-        $this->userRepository
-            ->expects($this->never())
-            ->method('save');
-
-        $this->twoFactorCodeRepository
-            ->expects($this->never())
-            ->method('save');
-
         $this->loginAttemptRepository
             ->expects($this->once())
             ->method('save');
 
-        $command = new LoginUserCommand(
-            'test@example.com',
-            'password123',
-            '127.0.0.1'
-        );
+        // Event de failure dispatché
+        $this->eventDispatcher
+            ->expects($this->once())
+            ->method('dispatch');
 
+        $command = new LoginUserCommand('test@example.com', 'password123', '127.0.0.1');
         $result = $this->handler->handle($command);
 
         $this->assertFalse($result->isSuccess());
-        $this->assertSame('Account is temporarily blocked', $result->getErrorMessage());
+        $this->assertEquals('Account is temporarily blocked', $result->getErrorMessage());
     }
 
     public function testNonExistentUserRecordsFailure(): void
@@ -166,27 +139,18 @@ final class LoginUserHandlerTest extends TestCase
         $this->userRepository
             ->expects($this->once())
             ->method('findByEmail')
-            ->with('nonexistent@example.com')
             ->willReturn(null);
-
-        $this->userRepository
-            ->expects($this->never())
-            ->method('save');
-
-        $this->twoFactorCodeRepository
-            ->expects($this->never())
-            ->method('save');
 
         $this->loginAttemptRepository
             ->expects($this->once())
             ->method('save');
 
-        $command = new LoginUserCommand(
-            'nonexistent@example.com',
-            'password',
-            '127.0.0.1'
-        );
+        // Event de failure dispatché
+        $this->eventDispatcher
+            ->expects($this->once())
+            ->method('dispatch');
 
+        $command = new LoginUserCommand('nonexistent@example.com', 'password', '127.0.0.1');
         $result = $this->handler->handle($command);
 
         $this->assertFalse($result->isSuccess());

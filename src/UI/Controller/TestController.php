@@ -2,23 +2,25 @@
 
 namespace UI\Controller;
 
-use Infrastructure\Api\OpenFoodFactsClient;
+use Infrastructure\Mail\TwoFactorMailer;
+use Domain\Identity\Entity\TwoFactorCode;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Uid\Uuid;
 
 class TestController extends AbstractController
 {
-    #[Route('/test/api', name: 'test_api')]
-    public function testApi(OpenFoodFactsClient $client): JsonResponse
+    #[Route('/test/mail', name: 'test_mail')]
+    public function testMail(TwoFactorMailer $mailer): Response
     {
-        // Test avec un produit Coca-Cola
-        $product = $client->getProduct('5449000000996');
-        $stats = $client->getNutriscoreStats(50);
+        $code = TwoFactorCode::generate(Uuid::v4());
         
-        return new JsonResponse([
-            'product' => $product ? 'OK' : 'NOT FOUND',
-            'nutriscore_stats' => $stats,
-        ]);
+        try {
+            $mailer->sendCode('tawesi7222@newtrea.com', $code);
+            return new Response('Email envoyé avec succès ! Code: ' . $code->getCode());
+        } catch (\Exception $e) {
+            return new Response('Erreur : ' . $e->getMessage(), 500);
+        }
     }
 }
