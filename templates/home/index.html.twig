@@ -1,0 +1,55 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Accueil - MMM{% endblock %}
+
+{% block main_class %}{% endblock %}
+
+{% block body %}
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-emerald-100">
+    <div class="max-w-md w-full space-y-8 p-8">
+        <div class="text-center">
+            <h1 class="text-6xl mb-4"></h1>
+            <h2 class="text-4xl font-extrabold text-gray-900 mb-2">
+                MMM
+            </h2>
+            <p class="text-xl text-gray-600">
+                Mieux Manger en Marne
+            </p>
+            <p class="mt-4 text-gray-500">
+                Analysez vos habitudes alimentaires avec OpenFoodFacts
+            </p>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title text-center">Bienvenue</h3>
+            </div>
+            <div class="card-content space-y-4">
+                <a href="{{ path('login') }}" 
+                   class="btn btn-primary w-full text-center block">
+                    Se connecter
+                </a>
+                
+                <p class="text-center text-sm text-muted-foreground">
+                    Créez des dashboards personnalisés avec des widgets nutritionnels
+                </p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-4 text-center">
+            <div class="card p-4">
+                <div class="text-3xl mb-2"></div>
+                <p class="text-xs text-muted-foreground">Dashboards</p>
+            </div>
+            <div class="card p-4">
+                <div class="text-3xl mb-2"></div>
+                <p class="text-xs text-muted-foreground">2FA Email</p>
+            </div>
+            <div class="card p-4">
+                <div class="text-3xl mb-2"></div>
+                <p class="text-xs text-muted-foreground">OpenFoodFacts</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

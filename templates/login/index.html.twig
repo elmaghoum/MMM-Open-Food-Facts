@@ -1,0 +1,60 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Connexion - MMM{% endblock %}
+
+{% block main_class %}{% endblock %}
+
+{% block body %}
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-emerald-100">
+    <div class="max-w-md w-full space-y-8 p-8">
+        <div class="text-center">
+            <a href="{{ path('home') }}" class="inline-block">
+                <h1 class="text-5xl mb-2"></h1>
+                <h2 class="text-3xl font-bold text-gray-900">MMM</h2>
+            </a>
+            <p class="mt-2 text-gray-600">
+                Connectez-vous à votre compte
+            </p>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Connexion</h3>
+            </div>
+            <div class="card-content">
+                {{ form_start(form, {'attr': {'class': 'space-y-4'}}) }}
+                
+                <div>
+                    {{ form_label(form.email, null, {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.email) }}
+                    {{ form_errors(form.email) }}
+                </div>
+
+                <div>
+                    {{ form_label(form.password, null, {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.password) }}
+                    {{ form_errors(form.password) }}
+                </div>
+
+                <div class="pt-2">
+                    {{ form_widget(form.submit) }}
+                </div>
+
+                {{ form_end(form) }}
+
+                <div class="mt-4 text-center">
+                    <p class="text-sm text-muted-foreground">
+                        Un code de vérification sera envoyé par email
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center">
+            <a href="{{ path('home') }}" class="text-sm text-primary hover:underline">
+                ← Retour à l'accueil
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
