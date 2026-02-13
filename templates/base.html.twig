@@ -4,24 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}MMM - Mieux Manger en Marne{% endblock %}</title>
-    
+
     {% block stylesheets %}
-        <link rel="stylesheet" href="{{ asset('styles/app.css') }}">
+        {{ encore_entry_link_tags('app') }}
     {% endblock %}
 </head>
 <body class="h-full bg-background text-foreground">
+
     {% if app.user %}
         <nav class="border-b bg-card">
             <div class="container mx-auto px-4 py-3 flex items-center justify-between">
                 <a href="{{ path('dashboard') }}" class="text-xl font-bold text-primary">
                     MMM
                 </a>
+
                 <div class="flex items-center gap-4">
                     <span class="text-sm text-muted-foreground">
-                        👤 {{ app.user.userIdentifier }}
+                        {{ app.user.userIdentifier }}
                     </span>
-                    <a href="{{ path('logout') }}" 
-                       class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-destructive text-destructive-foreground hover:bg-destructive/90 h-9 px-4 py-2">
+
+                    <a href="{{ path('logout') }}"
+                       class="btn btn-destructive h-9 px-4 py-2">
                         Déconnexion
                     </a>
                 </div>
@@ -29,24 +32,31 @@
         </nav>
     {% endif %}
 
-
     {% for type, messages in app.flashes %}
         <div class="container mx-auto px-4 mt-4">
             {% for message in messages %}
-                <div class="rounded-lg border p-4 {% if type == 'success' %}bg-green-50 border-green-200 text-green-800{% elseif type == 'error' %}bg-red-50 border-red-200 text-red-800{% else %}bg-blue-50 border-blue-200 text-blue-800{% endif %}">
-                    {{ message|raw }}
+                <div class="rounded-lg border p-4
+                    {% if type == 'success' %}
+                        bg-green-50 border-green-200 text-green-800
+                    {% elseif type == 'error' %}
+                        bg-red-50 border-red-200 text-red-800
+                    {% else %}
+                        bg-blue-50 border-blue-200 text-blue-800
+                    {% endif %}
+                ">
+                    {{ message }}
                 </div>
             {% endfor %}
         </div>
     {% endfor %}
 
-    {# Contenu principal #}
     <main class="{% block main_class %}container mx-auto px-4 py-8{% endblock %}">
         {% block body %}{% endblock %}
     </main>
 
     {% block javascripts %}
-        {{ importmap() }}
+        {{ encore_entry_script_tags('app') }}
     {% endblock %}
+
 </body>
 </html>

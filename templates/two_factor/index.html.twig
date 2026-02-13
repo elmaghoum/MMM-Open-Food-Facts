@@ -1,0 +1,55 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Vérification 2FA - MMM{% endblock %}
+
+{% block main_class %}{% endblock %}
+
+{% block body %}
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-emerald-100">
+    <div class="max-w-md w-full space-y-8 p-8">
+        <div class="text-center">
+            <h1 class="text-5xl mb-2"></h1>
+            <h2 class="text-3xl font-bold text-gray-900">Vérification</h2>
+            <p class="mt-2 text-gray-600">
+                Entrez le code reçu par email
+            </p>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Code de vérification</h3>
+            </div>
+            <div class="card-content">
+                {{ form_start(form, {'attr': {'class': 'space-y-6'}}) }}
+                
+                <div>
+                    {{ form_label(form.code, null, {'label_attr': {'class': 'form-label text-center block'}}) }}
+                    {{ form_widget(form.code) }}
+                    {{ form_errors(form.code) }}
+                    <p class="mt-2 text-xs text-center text-muted-foreground">
+                        Le code expire dans 10 minutes
+                    </p>
+                </div>
+
+                <div>
+                    {{ form_widget(form.submit) }}
+                </div>
+
+                {{ form_end(form) }}
+
+                <div class="mt-4 text-center">
+                    <p class="text-sm text-muted-foreground">
+                        Vérifiez votre boîte email (et spam)
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center">
+            <a href="{{ path('login') }}" class="text-sm text-primary hover:underline">
+                ← Retour à la connexion
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

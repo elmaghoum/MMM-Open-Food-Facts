@@ -1,0 +1,38 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Déconnexion - MMM{% endblock %}
+
+{% block main_class %}{% endblock %}
+
+{% block body %}
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-emerald-100">
+    <div class="max-w-md w-full space-y-8 p-8">
+        <div class="text-center">
+            <h1 class="text-5xl mb-4"></h1>
+            <h2 class="text-3xl font-bold text-gray-900 mb-2">
+                À bientôt !
+            </h2>
+            <p class="text-gray-600">
+                Vous êtes bien déconnecté
+            </p>
+        </div>
+
+        <div class="card">
+            <div class="card-content text-center py-8">
+                <p class="text-muted-foreground mb-6">
+                    Redirection vers l'accueil...
+                </p>
+                <div class="flex justify-center">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    setTimeout(() => {
+        window.location.href = '{{ path('home') }}';
+    }, 2000);
+</script>
+{% endblock %}

@@ -1,0 +1,181 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Dashboard - MMM{% endblock %}
+
+{% block body %}
+<div class="space-y-6">
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-3xl font-bold">Mon Dashboard</h1>
+            <p class="text-muted-foreground">Analysez vos données nutritionnelles</p>
+        </div>
+        <button id="add-widget-btn" class="btn btn-primary">
+            + Ajouter un widget
+        </button>
+    </div>
+
+    {% if dashboard and dashboard.widgets|length > 0 %}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="dashboard-grid">
+            {% for widget in dashboard.widgets %}
+                <div class="card widget-card" 
+                     data-widget-id="{{ widget.id.toRfc4122 }}"
+                     data-row="{{ widget.row }}"
+                     data-column="{{ widget.column }}"
+                     style="grid-column: {{ widget.column }}; grid-row: {{ widget.row }};">
+                    <div class="card-header">
+                        <div class="flex items-center justify-between">
+                            <h3 class="card-title text-lg">
+                                {% if widget.type.value == 'pie_chart' %} Graphique Circulaire
+                                {% elseif widget.type.value == 'bar_chart' %} Graphique en Barres
+                                {% elseif widget.type.value == 'line_chart' %} Graphique Linéaire
+                                {% elseif widget.type.value == 'radar_chart' %} Graphique Radar
+                                {% elseif widget.type.value == 'doughnut_chart' %} Graphique Donut
+                                {% elseif widget.type.value == 'polar_area_chart' %} Aire Polaire
+                                {% elseif widget.type.value == 'mixed_chart' %} Graphique Mixte
+                                {% endif %}
+                            </h3>
+                            <button class="text-destructive hover:text-destructive/80 text-sm">
+                                Supprimer
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div class="h-64 flex items-center justify-center">
+                            <canvas id="chart-{{ widget.id.toRfc4122 }}"></canvas>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="card">
+            <div class="card-content text-center py-12">
+                <div class="text-6xl mb-4"></div>
+                <h3 class="text-xl font-semibold mb-2">Aucun widget</h3>
+                <p class="text-muted-foreground mb-4">
+                    Commencez par ajouter un widget pour visualiser vos données
+                </p>
+                <button id="add-widget-btn-empty" class="btn btn-primary">
+                    + Ajouter mon premier widget
+                </button>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+{# Modal d'ajout de widget #}
+<div id="add-widget-modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+    <div class="card max-w-lg w-full mx-4">
+        <div class="card-header">
+            <h3 class="card-title">Ajouter un widget</h3>
+        </div>
+        <div class="card-content space-y-4">
+            <div>
+                <label class="form-label">Type de graphique</label>
+                <select id="widget-type" class="form-control">
+                    <option value="pie_chart"> Graphique Circulaire</option>
+                    <option value="doughnut_chart"> Graphique Donut</option>
+                    <option value="bar_chart"> Graphique en Barres</option>
+                    <option value="line_chart"> Graphique Linéaire</option>
+                    <option value="radar_chart"> Graphique Radar</option>
+                    <option value="polar_area_chart"> Aire Polaire</option>
+                    <option value="mixed_chart"> Graphique Mixte</option>
+                </select>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="form-label">Ligne</label>
+                    <input type="number" id="widget-row" class="form-control" min="1" value="1">
+                </div>
+                <div>
+                    <label class="form-label">Colonne</label>
+                    <select id="widget-column" class="form-control">
+                        <option value="1">Colonne 1</option>
+                        <option value="2">Colonne 2</option>
+                    </select>
+                </div>
+            </div>
+
+            <div>
+                <label class="form-label">Données</label>
+                <select id="widget-data" class="form-control">
+                    <option value="nutriscore">Nutriscore</option>
+                    <option value="nova">Groupe NOVA</option>
+                </select>
+            </div>
+
+            <div class="flex gap-2">
+                <button id="add-widget-confirm" class="btn btn-primary flex-1">
+                    Ajouter
+                </button>
+                <button id="add-widget-cancel" class="btn btn-secondary flex-1">
+                    Annuler
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+        // test de chart.js en guise de widgets
+        // Charger les données et créer les graphiques
+        document.querySelectorAll('.widget-card').forEach(card => {
+            const widgetId = card.dataset.widgetId;
+            const canvas = document.getElementById(`chart-${widgetId}`);
+            
+            fetch(`/dashboard/widget/${widgetId}/data`)
+                .then(res => res.json())
+                .then(data => {
+                    new Chart(canvas, {
+                        type: data.datasets[0].type || 'pie',
+                        data: data,
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: true,
+                        }
+                    });
+                });
+        });
+
+        // Modal de widget
+        const modal = document.getElementById('add-widget-modal');
+        const openButtons = document.querySelectorAll('#add-widget-btn, #add-widget-btn-empty');
+        const closeButton = document.getElementById('add-widget-cancel');
+        const confirmButton = document.getElementById('add-widget-confirm');
+
+        openButtons.forEach(btn => {
+            btn?.addEventListener('click', () => modal.classList.remove('hidden'));
+        });
+
+        closeButton?.addEventListener('click', () => modal.classList.add('hidden'));
+
+        confirmButton?.addEventListener('click', async () => {
+            const type = document.getElementById('widget-type').value;
+            const row = parseInt(document.getElementById('widget-row').value);
+            const column = parseInt(document.getElementById('widget-column').value);
+            const data = document.getElementById('widget-data').value;
+
+            const response = await fetch('/dashboard/widget/add', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type,
+                    row,
+                    column,
+                    configuration: { data }
+                })
+            });
+
+            if (response.ok) {
+                location.reload();
+            } else {
+                const error = await response.json();
+                alert(error.error);
+            }
+        });
+    </script>
+{% endblock %}
