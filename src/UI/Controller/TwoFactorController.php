@@ -13,8 +13,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
-use Symfony\Component\Security\Http\Authenticator\FormLoginAuthenticator;
+use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 use UI\Form\TwoFactorType;
 
 final class TwoFactorController extends AbstractController
@@ -23,8 +22,6 @@ final class TwoFactorController extends AbstractController
         private readonly ValidateTwoFactorHandler $validateTwoFactorHandler,
         private readonly TwoFactorSessionStorage $twoFactorStorage,
         private readonly UserRepositoryInterface $userRepository,
-        private readonly UserAuthenticatorInterface $userAuthenticator,
-        private readonly FormLoginAuthenticator $formLoginAuthenticator,
     ) {
     }
 
@@ -53,18 +50,23 @@ final class TwoFactorController extends AbstractController
             $result = $this->validateTwoFactorHandler->handle($command);
 
             if ($result->isValid()) {
-                // Code valide : authentifier l'utilisateur
+                // Code valide - créer la session utilisateur
                 $domainUser = $this->userRepository->findById($userId);
                 
                 if ($domainUser) {
                     $userAdapter = UserAdapter::fromDomainUser($domainUser);
                     
-                    // Authentifier via Symfony Security
-                    $this->userAuthenticator->authenticateUser(
+                    // Créer la session Symfony Security manuellement
+                    $token = new \Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken(
                         $userAdapter,
-                        $this->formLoginAuthenticator,
-                        $request
+                        'main',
+                        $userAdapter->getRoles()
                     );
+                    
+                    $this->container->get('security.token_storage')->setToken($token);
+                    
+                    // Sauvegarder la session
+                    $request->getSession()->set('_security_main', serialize($token));
 
                     // Nettoyer la session 2FA
                     $this->twoFactorStorage->clear();
