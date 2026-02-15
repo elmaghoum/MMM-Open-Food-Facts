@@ -148,14 +148,48 @@ function openWidgetConfigModal(type, row, column, existingConfig = null, widgetI
 function generateConfigModal(type, row, column, existingConfig) {
     const titles = {
         'product_search': 'Recherche Produit',
-        'sugar_salt_comparison': 'Comparaison Sucre et Sel',
+        'quick_barcode_search': 'Recherche par Code-barres',
+        'sugar_salt_comparison': 'Comparaison Sucre & Sel',
         'nutriscore_comparison': 'Comparaison Nutriscore',
         'nova_comparison': 'Comparaison NOVA',
-        'nutrition_pie': 'Graphique Nutritionnel'
+        'nutrition_pie': 'Graphique Nutritionnel',
+        'shopping_list': 'Ma Liste de Course'
     };
+
+    // Pour shopping_list, pas besoin de recherche - modal à part
+    if (type === 'shopping_list') {
+        return `
+            <div class="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+                <h2 class="text-2xl font-bold mb-4">${titles[type]}</h2>
+                
+                <div class="mb-6 p-4 bg-blue-50 rounded-lg">
+                    <p class="text-sm text-gray-700">
+                        📝 Votre liste de course est prête ! Utilisez les boutons <strong class="text-green-600">+</strong> 
+                        sur les autres widgets pour ajouter des produits.
+                    </p>
+                </div>
+
+                <div class="flex gap-2 mt-6">
+                    <button class="save-btn flex-1 bg-primary text-white px-4 py-2 rounded-md hover:bg-primary/90 flex items-center justify-center">
+                        <span class="save-btn-text">Ajouter au dashboard</span>
+                        <span class="save-btn-loader hidden ml-2">
+                            <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                        </span>
+                    </button>
+                    <button class="cancel-btn flex-1 bg-gray-200 px-4 py-2 rounded-md hover:bg-gray-300">
+                        Annuler
+                    </button>
+                </div>
+            </div>
+        `;
+    }
 
     const needsMultiple = ['sugar_salt_comparison', 'nutriscore_comparison', 'nova_comparison'].indexOf(type) !== -1;
     const needsSingle = ['product_search', 'nutrition_pie'].indexOf(type) !== -1;
+    const needsBarcode = type === 'quick_barcode_search';
 
     let selectedBarcode = '';
     let selectedBarcodes = [];
@@ -168,6 +202,18 @@ function generateConfigModal(type, row, column, existingConfig) {
     return `
         <div class="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
             <h2 class="text-2xl font-bold mb-4">${titles[type]}</h2>
+            
+            ${needsBarcode ? `
+                <div class="mb-4">
+                    <label class="block text-sm font-medium mb-2">Entrez le code-barres</label>
+                    <input type="text" 
+                           class="barcode-input w-full px-3 py-2 border rounded-md font-mono" 
+                           placeholder="Ex: 3017620422003"
+                           value="${selectedBarcode}"
+                           maxlength="13">
+                    <p class="text-xs text-gray-500 mt-1">Code-barres à 8 ou 13 chiffres</p>
+                </div>
+            ` : ''}
             
             ${needsSingle ? `
                 <div class="mb-4">
@@ -184,7 +230,9 @@ function generateConfigModal(type, row, column, existingConfig) {
 
             ${needsMultiple ? `
                 <div class="mb-4">
-                    <label class="block text-sm font-medium mb-2">Ajouter des produits (1 à 5)</label>
+                    <label class="block text-sm font-medium mb-2">
+                        ${type === 'shopping_list' ? 'Ajouter des produits à votre liste' : 'Ajouter des produits (1 à 5)'}
+                    </label>
                     <input type="text" 
                            class="product-search-input w-full px-3 py-2 border rounded-md" 
                            placeholder="Tapez le nom du produit..."
@@ -198,7 +246,7 @@ function generateConfigModal(type, row, column, existingConfig) {
 
             <div class="flex gap-2 mt-6">
                 <button class="save-btn flex-1 bg-primary text-white px-4 py-2 rounded-md hover:bg-primary/90 flex items-center justify-center">
-                    <span class="save-btn-text">Ajouter au dashboard</span>
+                    <span class="save-btn-text">${existingConfig ? 'Mettre à jour' : 'Ajouter au dashboard'}</span>
                     <span class="save-btn-loader hidden ml-2">
                         <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -360,7 +408,17 @@ function addProductToSelection(container, barcode, name, brands) {
 function saveWidget(type, row, column, modalContainer) {
     let configuration = {};
 
-    if (type === 'product_search' || type === 'nutrition_pie') {
+    if (type === 'shopping_list') {
+        // Liste de course vide au départ
+        configuration = { barcodes: [] };
+    } else if (type === 'quick_barcode_search') {
+        const barcode = modalContainer.querySelector('.barcode-input').value.trim();
+        if (!barcode || !/^\d{8,13}$/.test(barcode)) {
+            alert('Veuillez entrer un code-barres valide (8 ou 13 chiffres)');
+            return;
+        }
+        configuration = { barcode: barcode };
+    } else if (type === 'product_search' || type === 'nutrition_pie') {
         const barcode = modalContainer.querySelector('.selected-barcode').value;
         if (!barcode) {
             alert('Veuillez sélectionner un produit');
@@ -424,17 +482,28 @@ function saveWidget(type, row, column, modalContainer) {
 function updateWidget(widgetId, modalContainer) {
     const configuration = {};
 
-    const barcodeInput = modalContainer.querySelector('.selected-barcode');
+    const barcodeInput = modalContainer.querySelector('.barcode-input');
+    const barcodeInputSingle = modalContainer.querySelector('.selected-barcode');
     const barcodesInput = modalContainer.querySelector('.selected-barcodes');
 
     if (barcodeInput) {
-        const barcode = barcodeInput.value;
+        // Widget quick_barcode_search
+        const barcode = barcodeInput.value.trim();
+        if (!barcode || !/^\d{8,13}$/.test(barcode)) {
+            alert('Veuillez entrer un code-barres valide (8 ou 13 chiffres)');
+            return;
+        }
+        configuration.barcode = barcode;
+    } else if (barcodeInputSingle) {
+        // Widget product_search ou nutrition_pie
+        const barcode = barcodeInputSingle.value;
         if (!barcode) {
             alert('Veuillez sélectionner un produit');
             return;
         }
         configuration.barcode = barcode;
     } else if (barcodesInput) {
+        // Widgets de comparaison ou shopping_list
         const barcodes = JSON.parse(barcodesInput.value || '[]');
         if (barcodes.length === 0) {
             alert('Veuillez ajouter au moins un produit');
@@ -511,6 +580,12 @@ function loadWidgetData(widgetId, widgetType) {
 function renderWidgetContent(widgetId, widgetType, data, contentDiv) {
     if (data.type === 'product_info') {
         renderProductInfo(data.product, contentDiv);
+    } else if (data.type === 'quick_barcode_empty') {
+        renderQuickBarcodeEmpty(contentDiv);
+    } else if (data.type === 'shopping_list') {
+        renderShoppingList(data.products, contentDiv);
+    } else if (data.type === 'shopping_list_empty') {
+        renderShoppingListEmpty(contentDiv);
     } else if (data.type === 'bar') {
         renderBarChart(widgetId, data.data, contentDiv);
     } else if (data.type === 'nutriscore_comparison') {
@@ -520,6 +595,18 @@ function renderWidgetContent(widgetId, widgetType, data, contentDiv) {
     } else if (data.type === 'pie') {
         renderPieChart(widgetId, data, contentDiv);
     }
+}
+
+function renderQuickBarcodeEmpty(container) {
+    container.innerHTML = `
+        <div class="flex items-center justify-center h-full">
+            <div class="text-center text-gray-500">
+                <div class="text-4xl mb-3">🔢</div>
+                <p class="text-sm">Aucun code-barres configuré</p>
+                <p class="text-xs mt-2">Cliquez sur ⚙️ pour configurer</p>
+            </div>
+        </div>
+    `;
 }
 
 function renderProductInfo(product, container) {
@@ -545,7 +632,15 @@ function renderProductInfo(product, container) {
 
     container.innerHTML = `
         <div class="space-y-2 text-sm">
-            <div class="font-bold text-lg mb-3" style="width: 300px; word-wrap: break-word;">${product.name}</div>
+            <div class="flex items-start justify-between mb-3">
+                <div class="font-bold text-lg" style="width: 250px; word-wrap: break-word;">${product.name}</div>
+                <button class="add-to-list-btn flex-shrink-0 bg-green-500 text-white rounded-full w-8 h-8 mr-2 flex items-center justify-center hover:bg-green-600 transition"
+                        data-barcode="${product.barcode}"
+                        data-name="${product.name}"
+                        title="Ajouter à ma liste de course">
+                    +
+                </button>
+            </div>
             
             <div class="text-gray-600 mb-3" style="width: 300px;">
                 <strong>Marque :</strong> ${product.brands}
@@ -579,7 +674,7 @@ function renderProductInfo(product, container) {
                 </div>
             </div>
 
-            <div class="mt-3" style="max-width: 300px;">
+            <div class="mt-3">
                 <div class="text-xs text-gray-500 mb-1">Catégories</div>
                 <div class="text-xs">${product.categories}</div>
             </div>
@@ -591,12 +686,16 @@ function renderProductInfo(product, container) {
 
             <a href="${product.url}" 
                target="_blank" 
-               class="block mt-3 text-center bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-600"
-               style="width: 125px;">
-                Voir sur OFF →
+               class="block mt-3 text-center bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-600">
+                Voir + d'information →
             </a>
         </div>
     `;
+    
+    // Attacher l'événement au bouton
+    container.querySelector('.add-to-list-btn').addEventListener('click', function() {
+        addToShoppingList(this.dataset.barcode, this.dataset.name);
+    });
 }
 
 function renderBarChart(widgetId, chartData, container) {
@@ -630,21 +729,33 @@ function renderNutriscoreComparison(products, container) {
             const color = nutriscoreColors[p.nutriscore] || nutriscoreColors['N/A'];
             return `
                 <div class="flex items-center justify-between p-2 bg-gray-50 rounded">
-                    <div class="flex-1" style="max-width: 300px;">
+                    <div class="flex-1" style="max-width: 250px;">
                         <div class="font-medium text-sm">${p.name}</div>
                         <div class="text-xs text-gray-600"><strong>Marque :</strong> ${p.brands}</div>
                         <div class="text-xs text-gray-400">${p.barcode}</div>
                     </div>
-                    <div>
+                    <div class="flex items-center gap-2">
                         <span class="inline-block w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-xl"
                               style="background-color: ${color}">
                             ${p.nutriscore}
                         </span>
+                        <button class="add-to-list-btn bg-green-500 text-white rounded-full w-8 h-8 mr-2 flex items-center justify-center hover:bg-green-600 transition"
+                                data-barcode="${p.barcode}"
+                                data-name="${p.name}"
+                                title="Ajouter à ma liste de course">
+                            +
+                        </button>
                     </div>
                 </div>
             `;
         }).join('') +
         '</div>';
+    
+    container.querySelectorAll('.add-to-list-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            addToShoppingList(this.dataset.barcode, this.dataset.name);
+        });
+    });
 }
 
 function renderNovaComparison(products, container) {
@@ -661,21 +772,34 @@ function renderNovaComparison(products, container) {
             const color = novaColors[p.nova] || novaColors['N/A'];
             return `
                 <div class="flex items-center justify-between p-2 bg-gray-50 rounded">
-                    <div class="flex-1" style="max-width: 300px;">
+                    <div class="flex-1" style="max-width: 250px;">
                         <div class="font-medium text-sm">${p.name}</div>
                         <div class="text-xs text-gray-600"><strong>Marque :</strong> ${p.brands}</div>
                         <div class="text-xs text-gray-400">${p.barcode}</div>
                     </div>
-                    <div>
+                    <div class="flex items-center gap-2">
                         <span class="inline-block w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-xl"
                               style="background-color: ${color}">
                             ${p.nova}
                         </span>
+                        <button class="add-to-list-btn bg-green-500 text-white rounded-full w-8 h-8 mr-2 flex items-center justify-center hover:bg-green-600 transition"
+                                data-barcode="${p.barcode}"
+                                data-name="${p.name}"
+                                title="Ajouter à ma liste de course">
+                            +
+                        </button>
                     </div>
                 </div>
             `;
         }).join('') +
         '</div>';
+    
+    // Attacher les événements
+    container.querySelectorAll('.add-to-list-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            addToShoppingList(this.dataset.barcode, this.dataset.name);
+        });
+    });
 }
 
 function renderPieChart(widgetId, data, container) {
@@ -695,6 +819,75 @@ function renderPieChart(widgetId, data, container) {
             }
         }
     });
+}
+
+function renderShoppingList(products, container) {
+    if (products.length === 0) {
+        renderShoppingListEmpty(container);
+        return;
+    }
+
+    container.innerHTML = `
+        <div class="space-y-1">
+            <div class="mb-3 pb-2 border-b flex items-center justify-between">
+                <h4 class="font-semibold text-gray-700">Ma liste (${products.length}/20)</h4>
+                <button class="clear-list-btn text-xs text-red-500 hover:text-red-700 underline">
+                    Vider la liste
+                </button>
+            </div>
+            <div class="space-y-2 max-h-[280px] overflow-y-auto">
+                ${products.map(function(p) {
+                    return `
+                        <div class="flex items-center gap-2 p-2 bg-gray-50 rounded hover:bg-gray-100 transition">
+                            <div class="flex-1 min-w-0">
+                                <div class="font-medium text-sm truncate">${p.name}</div>
+                                <div class="text-xs text-gray-600">
+                                    <strong>Marque :</strong> ${p.brands}
+                                </div>
+                                <div class="text-xs text-gray-500">${p.quantity}</div>
+                            </div>
+                            <a href="${p.url}" 
+                               target="_blank" 
+                               class="flex-shrink-0 text-blue-500 hover:text-blue-700 text-lg"
+                               title="Voir sur OpenFoodFacts">
+                                🔗
+                            </a>
+                            <button class="remove-from-list-btn flex-shrink-0 text-red-500 hover:text-red-700 font-bold text-lg"
+                                    data-barcode="${p.barcode}"
+                                    title="Retirer de la liste">
+                                ×
+                            </button>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+        </div>
+    `;
+    
+    // Attacher les événements de suppression
+    container.querySelectorAll('.remove-from-list-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            removeFromShoppingList(this.dataset.barcode);
+        });
+    });
+    
+    // Attacher l'événement "Vider la liste"
+    container.querySelector('.clear-list-btn').addEventListener('click', function() {
+        clearShoppingList();
+    });
+}
+
+
+function renderShoppingListEmpty(container) {
+    container.innerHTML = `
+        <div class="flex items-center justify-center h-full">
+            <div class="text-center text-gray-500">
+                <div class="text-4xl mb-3">🛒</div>
+                <p class="text-sm">Votre liste est vide</p>
+                <p class="text-xs mt-2">Ajouter des produits via d'autres widgets</p>
+            </div>
+        </div>
+    `;
 }
 
 // ========================
@@ -736,5 +929,116 @@ function initEditButtons() {
 
             openWidgetConfigModal(widgetType, null, null, configuration, widgetId);
         });
+    });
+}
+
+// ========================
+// TOAST NOTIFICATIONS
+// ========================
+
+function showToast(message, type = 'success') {
+    const toast = document.createElement('div');
+    toast.className = 'fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg text-white transform transition-all duration-300 translate-x-0';
+    
+    if (type === 'success') {
+        toast.classList.add('bg-green-500');
+        toast.innerHTML = `<div class="flex items-center gap-2"><span>✓</span><span>${message}</span></div>`;
+    } else if (type === 'error') {
+        toast.classList.add('bg-red-500');
+        toast.innerHTML = `<div class="flex items-center gap-2"><span>✗</span><span>${message}</span></div>`;
+    } else if (type === 'warning') {
+        toast.classList.add('bg-orange-500');
+        toast.innerHTML = `<div class="flex items-center gap-2"><span>⚠</span><span>${message}</span></div>`;
+    }
+    
+    document.body.appendChild(toast);
+    
+    // Animation
+    setTimeout(function() {
+        toast.style.opacity = '1';
+    }, 10);
+    
+    // Retirer après 3 secondes
+    setTimeout(function() {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(100%)';
+        setTimeout(function() {
+            document.body.removeChild(toast);
+        }, 300);
+    }, 3000);
+}
+
+// ========================
+// AJOUTER À LA LISTE DE COURSE
+// ========================
+
+function addToShoppingList(barcode, productName) {
+    fetch('/dashboard/shopping-list/add/' + barcode, {
+        method: 'POST'
+    })
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+        if (data.success) {
+            showToast(data.message, 'success');
+            
+            refreshShoppingListWidget();
+        } else {
+            showToast(data.error, 'error');
+        }
+    })
+    .catch(function(err) {
+        console.error('Error adding to shopping list:', err);
+        showToast('Erreur lors de l\'ajout', 'error');
+    });
+}
+
+function removeFromShoppingList(barcode) {
+    if (!confirm('Retirer ce produit de la liste ?')) return;
+    
+    fetch('/dashboard/shopping-list/remove/' + barcode, {
+        method: 'DELETE'
+    })
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+        if (data.success) {
+            showToast(data.message, 'success');
+            refreshShoppingListWidget();
+        } else {
+            showToast(data.error, 'error');
+        }
+    })
+    .catch(function(err) {
+        console.error('Error removing from shopping list:', err);
+        showToast('Erreur lors de la suppression', 'error');
+    });
+}
+
+function clearShoppingList() {
+    if (!confirm('Vider toute votre liste de course ?')) return;
+    
+    fetch('/dashboard/shopping-list/clear', {
+        method: 'DELETE'
+    })
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+        if (data.success) {
+            showToast(data.message, 'success');
+            refreshShoppingListWidget();
+        } else {
+            showToast(data.error, 'error');
+        }
+    })
+    .catch(function(err) {
+        console.error('Error clearing shopping list:', err);
+        showToast('Erreur', 'error');
+    });
+}
+
+function refreshShoppingListWidget() {
+    document.querySelectorAll('.widget-container').forEach(function(widget) {
+        if (widget.dataset.widgetType === 'shopping_list') {
+            const widgetId = widget.dataset.widgetId;
+            loadWidgetData(widgetId, 'shopping_list');
+        }
     });
 }

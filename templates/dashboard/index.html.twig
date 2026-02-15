@@ -22,6 +22,29 @@
                 <p class="text-xs text-gray-600">Rechercher et afficher les détails d'un produit</p>
             </div>
 
+
+            {# Widget Recherche Rapide par Code-barres #}
+            <div class="mb-4 p-4 bg-indigo-50 rounded-lg border-2 border-dashed border-indigo-300 cursor-move hover:bg-indigo-100 transition"
+                 draggable="true"
+                 data-widget-type="quick_barcode_search">
+                <div class="flex items-center mb-2">
+                    <span class="text-2xl mr-2"></span>
+                    <h3 class="font-semibold">Recherche Code-barres</h3>
+                </div>
+                <p class="text-xs text-gray-600">Recherche rapide par code-barres</p>
+            </div>
+
+            {# Widget Liste de Course #}
+            <div class="mb-4 p-4 bg-orange-50 rounded-lg border-2 border-dashed border-orange-300 cursor-move hover:bg-orange-100 transition"
+                 draggable="true"
+                 data-widget-type="shopping_list">
+                <div class="flex items-center mb-2">
+                    <span class="text-2xl mr-2"></span>
+                    <h3 class="font-semibold">Ma Liste de Course</h3>
+                </div>
+                <p class="text-xs text-gray-600">Mes produits favoris</p>
+            </div>
+
             {# Widget Comparaison Sucre/Sel #}
             <div class="mb-4 p-4 bg-green-50 rounded-lg border-2 border-dashed border-green-300 cursor-move hover:bg-green-100 transition"
                  draggable="true"
@@ -65,6 +88,18 @@
                 </div>
                 <p class="text-xs text-gray-600">Graphique nutritionnel d'un produit</p>
             </div>
+            
+            {# Widget fixe "Bientôt" en bas #}
+            <div class="col-span-2 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg border-2 border-purple-200 p-6 text-center"
+                 style="height: 150px;">
+                <div class="flex items-center justify-center h-full">
+                    <div>
+                        <div class="text-4xl mb-2"></div>
+                        <h3 class="text-xl font-semibold text-gray-700 mb-1">D'autres widgets arrivent bientôt !</h3>
+                        <p class="text-sm text-gray-500">Restez connectés pour découvrir les nouvelles fonctionnalités</p>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -90,7 +125,7 @@
             {% if dashboard and dashboard.widgets|length > 0 %}
                 {% for widget in dashboard.widgets %}
                     <div class="widget-container bg-white rounded-lg border-2 border-gray-200 p-4 shadow-sm hover:shadow-md transition"
-                         style="min-width: 650px; height: 400px;"
+                         style="min-width: 500px height: 400px;"
                          data-widget-id="{{ widget.id.toRfc4122 }}"
                          data-widget-type="{{ widget.type.value }}"
                          data-row="{{ widget.row }}"
@@ -99,6 +134,8 @@
                         <div class="flex items-center justify-between mb-3">
                             <h3 class="font-semibold text-lg">
                                 {% if widget.type.value == 'product_search' %}Recherche
+                                {% elseif widget.type.value == 'quick_barcode_search' %}Code-barres
+                                {% elseif widget.type.value == 'shopping_list' %}Liste de Course
                                 {% elseif widget.type.value == 'sugar_salt_comparison' %}Sucre et Sel
                                 {% elseif widget.type.value == 'nutriscore_comparison' %}Nutriscore
                                 {% elseif widget.type.value == 'nova_comparison' %}NOVA

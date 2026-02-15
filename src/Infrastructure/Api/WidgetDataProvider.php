@@ -17,10 +17,12 @@ final readonly class WidgetDataProvider
     {
         return match ($type) {
             WidgetType::PRODUCT_SEARCH => $this->generateProductSearchData($configuration),
+            WidgetType::QUICK_BARCODE_SEARCH => $this->generateQuickBarcodeSearchData($configuration),
             WidgetType::SUGAR_SALT_COMPARISON => $this->generateSugarSaltComparisonData($configuration),
             WidgetType::NUTRISCORE_COMPARISON => $this->generateNutriscoreComparisonData($configuration),
             WidgetType::NOVA_COMPARISON => $this->generateNovaComparisonData($configuration),
             WidgetType::NUTRITION_PIE => $this->generateNutritionPieData($configuration),
+            WidgetType::SHOPPING_LIST => $this->generateShoppingListData($configuration),
         };
     }
 
@@ -205,5 +207,62 @@ final readonly class WidgetDataProvider
             4 => '#F44336',
             default => '#CCCCCC',
         };
+    }
+    private function generateQuickBarcodeSearchData(array $config): array
+    {
+        $barcode = $config['barcode'] ?? null;
+        
+        if (!$barcode) {
+            return ['type' => 'quick_barcode_empty'];
+        }
+
+        $product = $this->openFoodFactsService->getProductByBarcode($barcode);
+        
+        if (!$product) {
+            return ['error' => 'Product not found'];
+        }
+
+        return [
+            'type' => 'product_info',
+            'product' => [
+                'name' => $product['product_name'] ?? 'N/A',
+                'brands' => $product['brands'] ?? 'N/A',
+                'barcode' => $product['code'] ?? $barcode,
+                'nutriscore' => strtoupper($product['nutriscore_grade'] ?? 'N/A'),
+                'nova' => $product['nova_group'] ?? 'N/A',
+                'categories' => implode(', ', array_slice($product['categories_tags'] ?? [], 0, 3)),
+                'quantity' => $product['quantity'] ?? 'N/A',
+                'origins' => implode(', ', $product['origins_tags'] ?? ['N/A']),
+                'url' => $product['openfoodfacts_url'] ?? '#',
+            ],
+        ];
+    }
+
+    private function generateShoppingListData(array $config): array
+    {
+        $barcodes = $config['barcodes'] ?? [];
+        
+        if (empty($barcodes)) {
+            return ['type' => 'shopping_list_empty'];
+        }
+
+        $products = [];
+        foreach ($barcodes as $barcode) {
+            $product = $this->openFoodFactsService->getProductByBarcode($barcode);
+            if ($product) {
+                $products[] = [
+                    'name' => $product['product_name'] ?? 'Unknown',
+                    'brands' => $product['brands'] ?? 'N/A',
+                    'quantity' => $product['quantity'] ?? 'N/A',
+                    'barcode' => $product['code'] ?? $barcode,
+                    'url' => "https://fr.openfoodfacts.org/produit/{$barcode}",
+                ];
+            }
+        }
+
+        return [
+            'type' => 'shopping_list',
+            'products' => $products,
+        ];
     }
 }

@@ -446,5 +446,13 @@ final class OpenFoodFactsService
             return null;
         }
     }
+    
+    /**
+     * Recherche directe par code-barres (100 req/min)
+     */
+    public function getProductByBarcode(string $barcode): ?array
+    {
+        return $this->getProductDetails($barcode);
+    }
 
 }

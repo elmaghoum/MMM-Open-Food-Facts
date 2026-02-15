@@ -7,8 +7,10 @@ namespace Domain\Dashboard\ValueObject;
 enum WidgetType: string
 {
     case PRODUCT_SEARCH = 'product_search';
+    case QUICK_BARCODE_SEARCH = 'quick_barcode_search';
     case SUGAR_SALT_COMPARISON = 'sugar_salt_comparison';
     case NUTRISCORE_COMPARISON = 'nutriscore_comparison';
     case NOVA_COMPARISON = 'nova_comparison';
     case NUTRITION_PIE = 'nutrition_pie';
+    case SHOPPING_LIST = 'shopping_list';
 }

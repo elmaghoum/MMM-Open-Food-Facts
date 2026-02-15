@@ -14,13 +14,13 @@
     {% if app.user %}
         <nav class="border-b bg-card">
             <div class="container mx-auto px-4 py-3 flex items-center justify-between">
-                <a href="{{ path('dashboard') }}" class="text-xl font-bold text-primary">
-                    MMM
+                <a href="{{ path('home') }}" class="text-xl font-bold text-primary">
+                    Mieux Manger en Marne
                 </a>
 
                 <div class="flex items-center gap-4">
                     <span class="text-sm text-muted-foreground">
-                        {{ app.user.userIdentifier }}
+                        Bienvenue, {{ app.user.userIdentifier }}
                     </span>
 
                     <a href="{{ path('logout') }}"
