@@ -1,50 +1,68 @@
 <!DOCTYPE html>
-<html lang="fr" class="h-full">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}MMM - Mieux Manger en Marne{% endblock %}</title>
-
     {% block stylesheets %}
         {{ encore_entry_link_tags('app') }}
     {% endblock %}
 </head>
-<body class="h-full bg-background text-foreground">
-
+<body class="bg-background text-foreground antialiased">
     {% if app.user %}
-        <nav class="border-b bg-card">
-            <div class="container mx-auto px-4 py-3 flex items-center justify-between">
-                <a href="{{ path('home') }}" class="text-xl font-bold text-primary">
-                    Mieux Manger en Marne
-                </a>
-
-                <div class="flex items-center gap-4">
-                    <span class="text-sm text-muted-foreground">
-                        Bienvenue, {{ app.user.userIdentifier }}
-                    </span>
-
-                    <a href="{{ path('logout') }}"
-                       class="btn btn-destructive h-9 px-4 py-2">
-                        Déconnexion
+        <header class="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+            <div class="container flex h-14 items-center">
+                <div class="mr-4 flex">
+                    <a href="{{ path('home') }}" class="mr-6 flex items-center space-x-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6 text-primary">
+                            <path d="m5 11 4-7"/>
+                            <path d="m19 11-4-7"/>
+                            <path d="M2 11h20"/>
+                            <path d="m3.5 11 1.6 7.4a2 2 0 0 0 2 1.6h9.8a2 2 0 0 0 2-1.6l1.7-7.4"/>
+                            <path d="m9 11 1 9"/>
+                            <path d="M4.5 15.5h15"/>
+                            <path d="m15 11-1 9"/>
+                        </svg>
+                        <span class="hidden font-bold sm:inline-block">
+                            Mieux Manger en Marne
+                        </span>
                     </a>
+                    <nav class="flex items-center space-x-6 text-sm font-medium">
+                        <a href="{{ path('dashboard') }}" class="transition-colors hover:text-foreground/80 text-foreground">
+                            Dashboard
+                        </a>
+                    </nav>
+                </div>
+                <div class="flex flex-1 items-center justify-end space-x-4">
+                    <nav class="flex items-center space-x-2">
+                        <span class="text-sm text-muted-foreground hidden sm:inline-block mr-2">
+                            Bienvenue, {{ app.user.userIdentifier }}
+                        </span>
+                        {% include 'components/ui/button.html.twig' with {
+                            label: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 h-4 w-4"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg><span class="hidden sm:inline font-bold text-white">Déconnexion</span>',
+                            variant: 'default',
+                            size: 'sm',
+                            href: path('logout'),
+                            class: 'bg-red-600 hover:bg-red-700 text-white font-bold'
+                        } %}
+                    </nav>
+
                 </div>
             </div>
-        </nav>
+        </header>
     {% endif %}
 
+    {# Flash Messages avec Alert Shadcn - Auto-dismiss #}
     {% for type, messages in app.flashes %}
-        <div class="container mx-auto px-4 mt-4">
+        <div class="container mx-auto px-4 mt-4 space-y-2" id="flash-messages-container">
             {% for message in messages %}
-                <div class="rounded-lg border p-4
-                    {% if type == 'success' %}
-                        bg-green-50 border-green-200 text-green-800
-                    {% elseif type == 'error' %}
-                        bg-red-50 border-red-200 text-red-800
-                    {% else %}
-                        bg-blue-50 border-blue-200 text-blue-800
-                    {% endif %}
-                ">
-                    {{ message }}
+                {% set variant = type == 'success' ? 'success' : (type == 'error' ? 'destructive' : 'default') %}
+                <div class="flash-alert animate-in fade-in slide-in-from-top-2 duration-300" data-dismissible="true">
+                    {% include 'components/ui/alert.html.twig' with {
+                        variant: variant,
+                        description: message,
+                        dismissible: true,
+                    } %}
                 </div>
             {% endfor %}
         </div>
@@ -57,6 +75,5 @@
     {% block javascripts %}
         {{ encore_entry_script_tags('app') }}
     {% endblock %}
-
 </body>
 </html>

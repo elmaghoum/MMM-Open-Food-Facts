@@ -6,245 +6,428 @@
 
 {% block stylesheets %}
     {{ parent() }}
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        .float-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+        @keyframes gradient {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        .gradient-animation {
+            background-size: 200% 200%;
+            animation: gradient 15s ease infinite;
+        }
+    </style>
 {% endblock %}
 
 {% block body %}
-<div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
-    {# Hero Section #}
-    <section class="container mx-auto px-4 py-16 text-center">
-        <div class="max-w-4xl mx-auto">
-            <div class="text-6xl mb-6 text-green-600">
-                <i class="bi bi-basket"></i>
+<div class="flex flex-col min-h-screen bg-gradient-to-br from-green-50 via-white to-gray-50">
+    
+    {# Hero Section avec animation #}
+    <section class="relative overflow-hidden bg-gradient-to-br from-green-600 via-green-500 to-emerald-600 gradient-animation">
+        {# Motifs décoratifs #}
+        <div class="absolute inset-0 opacity-10">
+            <div class="absolute top-10 left-10 w-64 h-64 bg-white rounded-full blur-3xl"></div>
+            <div class="absolute bottom-10 right-10 w-96 h-96 bg-white rounded-full blur-3xl"></div>
+        </div>
+        
+        <div class="container relative px-4 py-20 md:py-32">
+            <div class="grid lg:grid-cols-2 gap-12 items-center">
+                {# Contenu gauche #}
+                <div class="text-white space-y-6 z-10">
+                
+                    <h1 class="text-4xl md:text-6xl font-bold leading-tight">
+                        Mieux Manger<br>en Marne
+                    </h1>
+                    
+                    <p class="text-xl md:text-2xl text-green-50 leading-relaxed">
+                        Comparez, analysez et composez votre liste de course pour une alimentation plus saine
+                    </p>
+                    
+                    <div class="flex flex-wrap gap-4 pt-4">
+                        {% if app.user %}
+                            {% include 'components/ui/button.html.twig' with {
+                                label: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><path d="M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z"/><path d="m3 9 2.45-4.9A2 2 0 0 1 7.24 3h9.52a2 2 0 0 1 1.8 1.1L21 9"/><path d="M12 3v6"/></svg>Accéder au Dashboard',
+                                size: 'lg',
+                                href: path('dashboard'),
+                                class: 'bg-white text-green-600 hover:bg-gray-100 shadow-lg hover:shadow-xl transition-all'
+                            } %}
+                        {% else %}
+                            {% include 'components/ui/button.html.twig' with {
+                                label: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" x2="3" y1="12" y2="12"/></svg>Commencer gratuitement',
+                                size: 'lg',
+                                href: path('login'),
+                                class: 'bg-green-600 text-white hover:bg-green-700 shadow-lg hover:shadow-xl transition-all'
+                            } %}
+                        {% endif %}
+                    </div>
+                    
+                    {# Stats #}
+                    <div class="grid grid-cols-3 gap-6 pt-8 border-t border-white/20">
+                        <div>
+                            <div class="text-3xl font-bold">3M+</div>
+                            <div class="text-sm text-green-100">Produits</div>
+                        </div>
+                        <div>
+                            <div class="text-3xl font-bold">7</div>
+                            <div class="text-sm text-green-100">Widgets</div>
+                        </div>
+                        <div>
+                            <div class="text-3xl font-bold">100%</div>
+                            <div class="text-sm text-green-100">Gratuit</div>
+                        </div>
+                    </div>
+                </div>
+                
+                {# Illustration droite avec badges Nutriscore #}
+                <div class="hidden lg:flex items-center justify-center relative float-animation">
+                    <div class="relative">
+                        {# Cercle principal #}
+                        <div class="w-96 h-96 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center shadow-2xl">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-white">
+                                <path d="m5 11 4-7"/>
+                                <path d="m19 11-4-7"/>
+                                <path d="M2 11h20"/>
+                                <path d="m3.5 11 1.6 7.4a2 2 0 0 0 2 1.6h9.8a2 2 0 0 0 2-1.6l1.7-7.4"/>
+                                <path d="m9 11 1 9"/>
+                                <path d="M4.5 15.5h15"/>
+                                <path d="m15 11-1 9"/>
+                            </svg>
+                        </div>
+                        
+                        {# Badges Nutriscore flottants #}
+                        <div class="absolute -top-4 -left-4 w-20 h-20 rounded-full flex items-center justify-center text-white font-bold text-2xl shadow-xl" style="background-color: #038141;">A</div>
+                        <div class="absolute top-8 -right-8 w-16 h-16 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-xl" style="background-color: #85BB2F;">B</div>
+                        <div class="absolute -bottom-8 left-12 w-16 h-16 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-xl" style="background-color: #FECB02;">C</div>
+                        <div class="absolute bottom-4 -right-4 w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-xl" style="background-color: #EE8100;">D</div>
+                    </div>
+                </div>
             </div>
-            <h1 class="text-4xl md:text-5xl font-bold mb-6 text-gray-800 px-4">
-                Mieux Manger en Marne
-            </h1>
-            <p class="text-xl text-gray-600 mb-8 leading-relaxed px-4">
-                Comparez, analysez et composez votre liste de course pour une alimentation plus saine grâce aux données de <strong>Open Food Facts</strong>
-            </p>
-            
-            {% if app.user %}
-                <a href="{{ path('dashboard') }}" class="inline-block bg-blue-600 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-blue-700 transition shadow-lg">
-                    <i class="bi bi-speedometer2 me-2"></i>Accéder à mon Dashboard
-                </a>
-            {% else %}
-                <a href="{{ path('login') }}" class="inline-block bg-green-600 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-green-700 transition shadow-lg">
-                    <i class="bi bi-box-arrow-in-right me-2"></i>Se connecter
-                </a>
-            {% endif %}
+        </div>
+        
+        {# Wave separator #}
+        <div class="absolute bottom-0 left-0 right-0">
+            <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full">
+                <path d="M0 0L60 10C120 20 240 40 360 46.7C480 53 600 47 720 43.3C840 40 960 40 1080 46.7C1200 53 1320 67 1380 73.3L1440 80V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0V0Z" fill="white"/>
+            </svg>
         </div>
     </section>
 
-    {# Contexte & But #}
-    <section class="container mx-auto px-4 py-16">
+    {# Section Bénéfices avec icônes #}
+    <section class="container px-4 py-20">
+        <div class="text-center mb-16">
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                Pourquoi choisir MMM ?
+            </h2>
+            <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+                Des outils puissants pour faire les bons choix alimentaires
+            </p>
+        </div>
+        
+        <div class="grid md:grid-cols-3 gap-8">
+            {# Bénéfice 1 #}
+            <div>
+                {% embed 'components/ui/card.html.twig' with {class: 'h-full border border-gray-200'} %}
+                    {% block content %}
+                        <div class="flex flex-col items-center text-center space-y-4 p-4">
+                            <div class="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-green-600">
+                                    <circle cx="11" cy="11" r="8"/>
+                                    <path d="m21 21-4.3-4.3"/>
+                                </svg>
+                            </div>
+                            <h3 class="text-xl font-bold text-gray-900">Recherche Puissante</h3>
+                            <p class="text-gray-600">
+                                Accédez à <strong>3 millions de produits</strong> référencés avec toutes leurs informations nutritionnelles
+                            </p>
+                        </div>
+                    {% endblock %}
+                {% endembed %}
+            </div>
+
+            {# Bénéfice 2 #}
+            <div>
+                {% embed 'components/ui/card.html.twig' with {class: 'h-full border border-gray-200'} %}
+                    {% block content %}
+                        <div class="flex flex-col items-center text-center space-y-4 p-4">
+                            <div class="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-600">
+                                    <line x1="12" x2="12" y1="20" y2="10"/>
+                                    <line x1="18" x2="18" y1="20" y2="4"/>
+                                    <line x1="6" x2="6" y1="20" y2="16"/>
+                                </svg>
+                            </div>
+                            <h3 class="text-xl font-bold text-gray-900">Comparaison Facile</h3>
+                            <p class="text-gray-600">
+                                Comparez jusqu'à <strong>5 produits</strong> simultanément selon différents critères nutritionnels
+                            </p>
+                        </div>
+                    {% endblock %}
+                {% endembed %}
+            </div>
+
+            {# Bénéfice 3 #}
+            <div>
+                {% embed 'components/ui/card.html.twig' with {class: 'h-full border border-gray-200'} %}
+                    {% block content %}
+                        <div class="flex flex-col items-center text-center space-y-4 p-4">
+                            <div class="w-16 h-16 rounded-full bg-orange-100 flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-orange-600">
+                                    <circle cx="8" cy="21" r="1"/>
+                                    <circle cx="19" cy="21" r="1"/>
+                                    <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>
+                                </svg>
+                            </div>
+                            <h3 class="text-xl font-bold text-gray-900">Liste Intelligente</h3>
+                            <p class="text-gray-600">
+                                Créez votre liste de course personnalisée avec vos <strong>produits favoris</strong>
+                            </p>
+                        </div>
+                    {% endblock %}
+                {% endembed %}
+            </div>
+        </div>
+    </section>
+
+    {# Section Widgets en grille #}
+    <section class="bg-gray-50 py-20">
+        <div class="container px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                    7 Widgets Interactifs
+                </h2>
+                <p class="text-lg text-gray-600">
+                    Des outils puissants pour analyser vos produits
+                </p>
+            </div>
+            
+            <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {# Widget Recherche #}
+                <div class="group">
+                    {% embed 'components/ui/card.html.twig' with {class: 'hover:shadow-lg transition-all duration-300 h-full'} %}
+                        {% block content %}
+                            <div class="flex flex-col items-center text-center space-y-3">
+                                <div class="w-14 h-14 rounded-lg bg-blue-100 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-600">
+                                        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-gray-900">Recherche</h3>
+                                    <p class="text-xs text-gray-600 mt-1">Par nom ou code-barres</p>
+                                </div>
+                            </div>
+                        {% endblock %}
+                    {% endembed %}
+                </div>
+
+                {# Widget Code-barres #}
+                <div class="group">
+                    {% embed 'components/ui/card.html.twig' with {class: 'hover:shadow-lg transition-all duration-300 h-full'} %}
+                        {% block content %}
+                            <div class="flex flex-col items-center text-center space-y-3">
+                                <div class="w-14 h-14 rounded-lg bg-indigo-100 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-600">
+                                        <path d="M3 5v14"/><path d="M8 5v14"/><path d="M12 5v14"/><path d="M17 5v14"/><path d="M21 5v14"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-gray-900">Code-barres</h3>
+                                    <p class="text-xs text-gray-600 mt-1">Recherche rapide</p>
+                                </div>
+                            </div>
+                        {% endblock %}
+                    {% endembed %}
+                </div>
+
+                {# Widget Sucre & Sel #}
+                <div class="group">
+                    {% embed 'components/ui/card.html.twig' with {class: 'hover:shadow-lg transition-all duration-300 h-full'} %}
+                        {% block content %}
+                            <div class="flex flex-col items-center text-center space-y-3">
+                                <div class="w-14 h-14 rounded-lg bg-green-100 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-green-600">
+                                        <line x1="12" x2="12" y1="20" y2="10"/><line x1="18" x2="18" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="16"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-gray-900">Sucre et Sel</h3>
+                                    <p class="text-xs text-gray-600 mt-1">Graphiques comparatifs</p>
+                                </div>
+                            </div>
+                        {% endblock %}
+                    {% endembed %}
+                </div>
+
+                {# Widget Nutriscore #}
+                <div class="group">
+                    {% embed 'components/ui/card.html.twig' with {class: 'hover:shadow-lg transition-all duration-300 h-full'} %}
+                        {% block content %}
+                            <div class="flex flex-col items-center text-center space-y-3">
+                                <div class="w-14 h-14 rounded-lg bg-yellow-100 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-yellow-600">
+                                        <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-gray-900">Nutriscore</h3>
+                                    <p class="text-xs text-gray-600 mt-1">Scores A à E</p>
+                                </div>
+                            </div>
+                        {% endblock %}
+                    {% endembed %}
+                </div>
+
+                {# Widget NOVA #}
+                <div class="group">
+                    {% embed 'components/ui/card.html.twig' with {class: 'hover:shadow-lg transition-all duration-300 h-full'} %}
+                        {% block content %}
+                            <div class="flex flex-col items-center text-center space-y-3">
+                                <div class="w-14 h-14 rounded-lg bg-purple-100 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-600">
+                                        <path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-gray-900">NOVA score</h3>
+                                    <p class="text-xs text-gray-600 mt-1">Indice de transformation alimentaire. Score de 1 à 4</p>
+                                </div>
+                            </div>
+                        {% endblock %}
+                    {% endembed %}
+                </div>
+
+                {# Widget Nutrition #}
+                <div class="group">
+                    {% embed 'components/ui/card.html.twig' with {class: 'hover:shadow-lg transition-all duration-300 h-full'} %}
+                        {% block content %}
+                            <div class="flex flex-col items-center text-center space-y-3">
+                                <div class="w-14 h-14 rounded-lg bg-pink-100 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-pink-600">
+                                        <path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-gray-900">Nutrition</h3>
+                                    <p class="text-xs text-gray-600 mt-1">Macronutriments</p>
+                                </div>
+                            </div>
+                        {% endblock %}
+                    {% endembed %}
+                </div>
+
+                {# Widget Liste - PRINCIPAL #}
+                <div class="group">
+                    {% embed 'components/ui/card.html.twig' with {class: 'hover:shadow-lg transition-all duration-300 h-full border-2'} %}
+                        {% block content %}
+                            <div class="flex flex-col items-center text-center space-y-3">
+                                <div class="w-14 h-14 rounded-lg bg-orange-100 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-orange-600">
+                                        <circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-gray-900">Liste de courses</h3>
+                                    <p class="text-xs text-gray-600 mt-1">Vos favoris</p>
+                                </div>
+                            </div>
+                        {% endblock %}
+                    {% endembed %}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {# Section FAQ avec Accordion #}
+    <section class="container px-4 py-20">
         <div class="max-w-5xl mx-auto">
-            <div class="grid md:grid-cols-2 gap-8">
-                {# Contexte #}
-                <div class="bg-white rounded-xl shadow-lg p-8">
-                    <div class="text-5xl mb-4 text-blue-600">
-                        <i class="bi bi-bullseye"></i>
-                    </div>
-                    <h2 class="text-3xl font-bold mb-4 text-gray-800">Notre Mission</h2>
-                    <p class="text-gray-600 leading-relaxed mb-4">
-                        Dans un monde où l'information nutritionnelle peut être complexe et difficile à comparer, 
-                        <strong>MMM</strong> vous aide à faire des choix éclairés pour votre santé.
-                    </p>
-                    <p class="text-gray-600 leading-relaxed">
-                        Grâce à notre plateforme, comparez facilement les produits alimentaires et constituez 
-                        une liste de course adaptée à vos objectifs nutritionnels.
-                    </p>
-                </div>
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                    Questions fréquentes
+                </h2>
+                <p class="text-lg text-gray-600">
+                    Tout ce que vous devez savoir sur MMM
+                </p>
+            </div>
 
-                {# Open Food Facts #}
-                <div class="bg-white rounded-xl shadow-lg p-8">
-                    <div class="text-5xl mb-4 text-green-600">
-                        <i class="bi bi-database"></i>
-                    </div>
-                    <h2 class="text-3xl font-bold mb-4 text-gray-800">Open Food Facts</h2>
-                    <p class="text-gray-600 leading-relaxed mb-4">
-                        Nous utilisons la base de données <strong>Open Food Facts</strong>, l'un des plus grands 
-                        agrégateurs de produits alimentaires au monde avec :
-                    </p>
-                    <ul class="space-y-2 text-gray-600">
-                        <li class="flex items-start">
-                            <i class="bi bi-check-circle-fill text-green-500 me-2 mt-1"></i>
-                            <span>Plus de <strong>3 millions de produits</strong> référencés</span>
-                        </li>
-                        <li class="flex items-start">
-                            <i class="bi bi-check-circle-fill text-green-500 me-2 mt-1"></i>
-                            <span>Données nutritionnelles complètes</span>
-                        </li>
-                        <li class="flex items-start">
-                            <i class="bi bi-check-circle-fill text-green-500 me-2 mt-1"></i>
-                            <span>Nutri-Score, NOVA, allergènes, additifs...</span>
-                        </li>
-                    </ul>
-                </div>
+            <div class="space-y-4">
+                {% for faq in [
+                    {q: 'Comment fonctionne MMM ?', a: 'MMM utilise la base de données Open Food Facts pour vous permettre de rechercher, comparer et analyser plus de 3 millions de produits alimentaires. Créez votre dashboard personnalisé avec nos 7 widgets interactifs.'},
+                    {q: 'Les données sont-elles fiables ?', a: 'Oui ! Toutes nos données proviennent d\'Open Food Facts, une base de données collaborative et open source maintenue par des milliers de contributeurs à travers le monde.'},
+                    {q: 'Puis-je sauvegarder mes produits favoris ?', a: 'Absolument ! Utilisez le widget "Ma Liste de Course" pour sauvegarder vos produits favoris. Vous pouvez ajouter jusqu\'à 20 produits dans votre liste.'},
+                    {q: 'Combien de widgets puis-je avoir ?', a: 'Dans cette version démo, vous pouvez ajouter jusqu\'à 10 widgets sur votre dashboard. Chaque widget est entièrement personnalisable.'},
+                ] %}
+                    {% embed 'components/ui/card.html.twig' with {class: 'hover:shadow-md transition-shadow'} %}
+                        {% block content %}
+                            <details class="group">
+                                <summary class="flex items-center justify-between cursor-pointer font-semibold text-gray-900 list-none">
+                                    {{ faq.q }}
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="transition-transform group-open:rotate-180">
+                                        <path d="m6 9 6 6 6-6"/>
+                                    </svg>
+                                </summary>
+                                <p class="mt-4 text-gray-600 text-sm leading-relaxed">
+                                    {{ faq.a }}
+                                </p>
+                            </details>
+                        {% endblock %}
+                    {% endembed %}
+                {% endfor %}
             </div>
         </div>
     </section>
 
-    {# Fonctionnalités #}
-    <section class="container mx-auto px-4 py-16 bg-white/50">
-        <div class="max-w-6xl mx-auto">
-            <h2 class="text-4xl font-bold text-center mb-12 text-gray-800">
-                <i class="bi bi-grid-3x3-gap me-2"></i>Nos Widgets Interactifs
-            </h2>
-            
-            <div class="grid md:grid-cols-3 gap-6">
-                {# Widget 1 #}
-                <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-xl transition">
-                    <div class="text-5xl mb-3 text-blue-600">
-                        <i class="bi bi-search"></i>
-                    </div>
-                    <h3 class="text-xl font-semibold mb-2 text-gray-800">Recherche Produits</h3>
-                    <p class="text-gray-600 text-sm">
-                        Recherchez par nom ou code-barres et découvrez toutes les informations nutritionnelles en un coup d'œil.
-                    </p>
-                </div>
-
-                {# Widget 2 #}
-                <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-xl transition">
-                    <div class="text-5xl mb-3 text-yellow-600">
-                        <i class="bi bi-trophy"></i>
-                    </div>
-                    <h3 class="text-xl font-semibold mb-2 text-gray-800">Comparaison Nutri-Score</h3>
-                    <p class="text-gray-600 text-sm">
-                        Comparez jusqu'à 5 produits selon leur Nutri-Score (A à E) pour choisir les plus sains.
-                    </p>
-                </div>
-
-                {# Widget 3 #}
-                <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-xl transition">
-                    <div class="text-5xl mb-3 text-purple-600">
-                        <i class="bi bi-lightning-charge"></i>
-                    </div>
-                    <h3 class="text-xl font-semibold mb-2 text-gray-800">Score NOVA</h3>
-                    <p class="text-gray-600 text-sm">
-                        Identifiez le degré de transformation des aliments (1 à 4) pour éviter l'ultra-transformé.
-                    </p>
-                </div>
-
-                {# Widget 4 #}
-                <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-xl transition">
-                    <div class="text-5xl mb-3 text-green-600">
-                        <i class="bi bi-bar-chart"></i>
-                    </div>
-                    <h3 class="text-xl font-semibold mb-2 text-gray-800">Sucre & Sel</h3>
-                    <p class="text-gray-600 text-sm">
-                        Visualisez et comparez les taux de sucre et de sel entre différents produits.
-                    </p>
-                </div>
-
-                {# Widget 5 #}
-                <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-xl transition">
-                    <div class="text-5xl mb-3 text-pink-600">
-                        <i class="bi bi-pie-chart"></i>
-                    </div>
-                    <h3 class="text-xl font-semibold mb-2 text-gray-800">Composition Nutritionnelle</h3>
-                    <p class="text-gray-600 text-sm">
-                        Analysez la répartition des macronutriments (protéines, glucides, lipides) d'un produit.
-                    </p>
-                </div>
-
-                {# Widget 6 #}
-                <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-xl transition border-2 border-green-400">
-                    <div class="text-5xl mb-3 text-orange-600">
-                        <i class="bi bi-cart-check"></i>
-                    </div>
-                    <h3 class="text-xl font-semibold mb-2 text-gray-800">Ma Liste de Course</h3>
-                    <p class="text-gray-600 text-sm">
-                        <strong>Widget principal !</strong> Sauvegardez vos produits favoris et constituez une liste saine.
-                    </p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    {# Données disponibles #}
-    <section class="container mx-auto px-4 py-16">
-        <div class="max-w-5xl mx-auto bg-gradient-to-r from-blue-500 to-green-500 rounded-2xl shadow-2xl p-8 text-white">
-            <h2 class="text-4xl font-bold text-center mb-8">
-                <i class="bi bi-journal-text me-2"></i>Informations Disponibles
-            </h2>
-            
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
-                <div class="bg-white/10 rounded-lg p-4 backdrop-blur">
-                    <strong class="block mb-2">
-                        <i class="bi bi-tag me-1"></i>Général
-                    </strong>
-                    Marque, catégories, origine, lieux de fabrication, labels, emballage
-                </div>
-                
-                <div class="bg-white/10 rounded-lg p-4 backdrop-blur">
-                    <strong class="block mb-2">
-                        <i class="bi bi-heart-pulse me-1"></i>Nutrition
-                    </strong>
-                    Calories, protéines, glucides, lipides, fibres, sel, vitamines, minéraux
-                </div>
-                
-                <div class="bg-white/10 rounded-lg p-4 backdrop-blur">
-                    <strong class="block mb-2">
-                        <i class="bi bi-shield-check me-1"></i>Qualité
-                    </strong>
-                    Nutri-Score (A-E), Score NOVA (1-4), additifs, allergènes
-                </div>
-                
-                <div class="bg-white/10 rounded-lg p-4 backdrop-blur">
-                    <strong class="block mb-2">
-                        <i class="bi bi-leaf me-1"></i>Composition
-                    </strong>
-                    Liste d'ingrédients, huile de palme, traces allergènes
-                </div>
-                
-                <div class="bg-white/10 rounded-lg p-4 backdrop-blur">
-                    <strong class="block mb-2">
-                        <i class="bi bi-activity me-1"></i>Détails nutritionnels
-                    </strong>
-                    Acides gras, oméga-3/6/9, cholestérol, alcool
-                </div>
-                
-                <div class="bg-white/10 rounded-lg p-4 backdrop-blur">
-                    <strong class="block mb-2">
-                        <i class="bi bi-camera me-1"></i>Images
-                    </strong>
-                    Photos du produit, tableau nutritionnel, liste d'ingrédients
-                </div>
-            </div>
-
-            <p class="text-center mt-8 text-white/90 text-sm">
-                Et bien plus encore ! Toutes les données proviennent de la base collaborative <strong>Open Food Facts</strong>
-            </p>
-        </div>
-    </section>
-
-    {# Call to Action #}
-    <section class="container mx-auto px-4 py-16 text-center">
-        <div class="max-w-3xl mx-auto">
-            <h2 class="text-4xl font-bold mb-6 text-gray-800">
+    <section class="bg-gradient-to-r from-green-600 to-emerald-600 py-20">
+        <div class="container px-4 text-center text-white">
+            <h2 class="text-3xl md:text-4xl font-bold mb-6">
                 Prêt à mieux manger ?
             </h2>
-            <p class="text-xl text-gray-600 mb-8">
-                Connectez-vous et commencez à comparer vos produits dès maintenant !
+            <p class="text-xl mb-8 text-green-50 max-w-2xl mx-auto">
+                Rejoignez-nous dès maintenant et commencez à faire des choix alimentaires éclairés
             </p>
             
             {% if not app.user %}
-                <a href="{{ path('login') }}" class="inline-block bg-gradient-to-r from-green-500 to-blue-500 text-white px-10 py-5 rounded-lg text-lg font-semibold hover:shadow-2xl transition transform hover:scale-105">
-                    <i class="bi bi-box-arrow-in-right me-2"></i>Commencer maintenant
-                </a>
+                {% include 'components/ui/button.html.twig' with {
+                    label: 'Commencer maintenant',
+                    size: 'lg',
+                    href: path('login'),
+                    class: 'bg-white/20 backdrop-blur-md border border-white/40 text-white hover:bg-white/30 shadow-xl transition-all'
+                } %}
             {% endif %}
         </div>
     </section>
 
     {# Footer #}
-    <footer class="bg-gray-900 text-white py-8">
-        <div class="container mx-auto px-4 text-center">
-            <p class="text-gray-400 text-sm">
-                © {{ 'now'|date('Y') }} MMM - Mieux Manger en Marne | 
-                Données fournies par <a href="https://fr.openfoodfacts.org" target="_blank" class="text-green-400 hover:underline">Open Food Facts</a> | 
-                Version démo
-            </p>
+    <footer class="border-t py-12 bg-gray-50">
+        <div class="container px-4">
+            <div class="grid md:grid-cols-3 gap-8 mb-8">
+                <div>
+                    <h3 class="font-bold text-gray-900 mb-4">MMM</h3>
+                    <p class="text-sm text-gray-600">
+                        Mieux Manger en Marne - Votre compagnon pour une alimentation plus saine
+                    </p>
+                </div>
+                <div>
+                    <h3 class="font-bold text-gray-900 mb-4">Données</h3>
+                    <p class="text-sm text-gray-600">
+                        Propulsé par <a href="https://fr.openfoodfacts.org" target="_blank" class="text-green-600 hover:underline">Open Food Facts</a>
+                    </p>
+                </div>
+                <div>
+                    <h3 class="font-bold text-gray-900 mb-4">Version</h3>
+                    <p class="text-sm text-gray-600">
+                        Version démo gratuite
+                    </p>
+                </div>
+            </div>
+            <div class="border-t pt-8 text-center text-sm text-gray-600">
+                © {{ 'now'|date('Y') }} - Mieux Manger en Marne | Version démo
+            </div>
         </div>
     </footer>
 </div>

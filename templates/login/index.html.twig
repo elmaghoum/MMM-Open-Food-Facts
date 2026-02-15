@@ -4,95 +4,125 @@
 
 {% block main_class %}{% endblock %}
 
-{% block stylesheets %}
-    {{ parent() }}
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-{% endblock %}
-
 {% block body %}
 <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-green-50 py-12 px-4">
     <div class="max-w-md w-full">
         {# Header avec logo #}
         <div class="text-center mb-8">
             <a href="{{ path('home') }}" class="inline-block group">
-                <div class="text-6xl mb-3 text-blue-600 group-hover:scale-110 transition-transform">
-                    <i class="bi bi-basket"></i>
+                <div class="text-6xl mb-3 text-primary group-hover:scale-110 transition-transform">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline-block">
+                        <path d="m5 11 4-7"/>
+                        <path d="m19 11-4-7"/>
+                        <path d="M2 11h20"/>
+                        <path d="m3.5 11 1.6 7.4a2 2 0 0 0 2 1.6h9.8a2 2 0 0 0 2-1.6l1.7-7.4"/>
+                        <path d="m9 11 1 9"/>
+                        <path d="M4.5 15.5h15"/>
+                        <path d="m15 11-1 9"/>
+                    </svg>
                 </div>
-                <h2 class="text-3xl font-bold text-gray-900 group-hover:text-blue-600 transition">
+                <h2 class="text-3xl font-bold text-foreground group-hover:text-primary transition">
                     Mieux Manger en Marne
                 </h2>
             </a>
-            <p class="mt-3 text-gray-600 text-lg">
+            <p class="mt-3 text-muted-foreground text-lg">
                 Connectez-vous à votre compte
             </p>
         </div>
 
-        {# Carte de connexion #}
-        <div class="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
-            <div class="mb-6">
-                <h3 class="text-2xl font-bold text-gray-800 flex items-center">
-                    <i class="bi bi-box-arrow-in-right me-2 text-blue-600"></i>
+        {# Carte de connexion - Shadcn Card #}
+        {% embed 'components/ui/card.html.twig' %}
+            {% block header %}
+                <h3 class="text-2xl font-bold text-card-foreground flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+                        <polyline points="10 17 15 12 10 7"/>
+                        <line x1="15" x2="3" y1="12" y2="12"/>
+                    </svg>
                     Connexion
                 </h3>
-            </div>
+            {% endblock %}
 
-            {{ form_start(form, {'attr': {'class': 'space-y-5'}}) }}
-            
-            {# Email #}
-            <div>
-                {{ form_label(form.email, null, {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-2'}}) }}
-                <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <i class="bi bi-envelope text-gray-400"></i>
+            {% block content %}
+                {{ form_start(form, {'attr': {'class': 'space-y-5'}}) }}
+                
+                {# Email #}
+                <div class="space-y-2">
+                    <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                        {{ form_label(form.email) }}
+                    </label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-muted-foreground">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect width="20" height="16" x="2" y="4" rx="2"/>
+                                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+                            </svg>
+                        </div>
+                        {{ form_widget(form.email, {'attr': {'class': 'flex h-10 w-full rounded-md border border-input bg-background pl-10 pr-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50', 'placeholder': 'votre@email.com'}}) }}
                     </div>
-                    {{ form_widget(form.email, {'attr': {'class': 'w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition', 'placeholder': 'votre@email.com'}}) }}
+                    {{ form_errors(form.email) }}
                 </div>
-                {{ form_errors(form.email) }}
-            </div>
 
-            {# Password #}
-            <div>
-                {{ form_label(form.password, null, {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-2'}}) }}
-                <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <i class="bi bi-lock text-gray-400"></i>
+                {# Password #}
+                <div class="space-y-2">
+                    <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                        {{ form_label(form.password) }}
+                    </label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-muted-foreground">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                            </svg>
+                        </div>
+                        {{ form_widget(form.password, {'attr': {'class': 'flex h-10 w-full rounded-md border border-input bg-background pl-10 pr-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50', 'placeholder': '••••••••'}}) }}
                     </div>
-                    {{ form_widget(form.password, {'attr': {'class': 'w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition', 'placeholder': '••••••••'}}) }}
+                    {{ form_errors(form.password) }}
                 </div>
-                {{ form_errors(form.password) }}
-            </div>
 
-            {# Bouton de soumission #}
-            <div class="pt-2">
-                {{ form_widget(form.submit) }}
-            </div>
-
-            {{ form_end(form) }}
-
-            {# Info 2FA #}
-            <div class="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                <div class="flex items-start">
-                    <i class="bi bi-info-circle text-blue-600 text-xl me-2 mt-0.5"></i>
-                    <p class="text-sm text-blue-800">
-                        Un code de vérification à 6 chiffres sera envoyé à votre adresse email pour sécuriser votre connexion.
-                    </p>
+                {# Bouton de soumission #}
+                <div class="pt-2">
+                    {{ form_widget(form.submit, {'attr': {'class': 'inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 w-full'}}) }}
                 </div>
-            </div>
-        </div>
+
+                {{ form_end(form) }}
+
+                {# Info 2FA #}
+                <div class="mt-6 p-4 rounded-lg border bg-blue-50 border-blue-200">
+                    <div class="flex items-start gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-600 mt-0.5 flex-shrink-0">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M12 16v-4"/>
+                            <path d="M12 8h.01"/>
+                        </svg>
+                        <p class="text-sm text-blue-800">
+                            Un code de vérification à 6 chiffres sera envoyé à votre adresse email pour sécuriser votre connexion.
+                        </p>
+                    </div>
+                </div>
+            {% endblock %}
+        {% endembed %}
 
         {# Lien retour #}
         <div class="mt-6 text-center">
-            <a href="{{ path('home') }}" class="inline-flex items-center text-sm text-gray-600 hover:text-blue-600 transition group">
-                <i class="bi bi-arrow-left me-2 group-hover:-translate-x-1 transition-transform"></i>
+            <a href="{{ path('home') }}" class="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition group">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="group-hover:-translate-x-1 transition-transform">
+                    <path d="m12 19-7-7 7-7"/>
+                    <path d="M19 12H5"/>
+                </svg>
                 Retour à l'accueil
             </a>
         </div>
 
-        {# Compte de test (pour démo) #}
-        <div class="mt-8 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+        {# Compte de test #}
+        <div class="mt-8 p-4 rounded-lg border bg-yellow-50 border-yellow-200">
             <div class="text-center">
-                <p class="text-sm font-semibold text-yellow-800 mb-2">
-                    <i class="bi bi-key me-1"></i>Compte de test (démo)
+                <p class="text-sm font-semibold text-yellow-800 mb-2 flex items-center justify-center gap-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M2 18v3c0 .6.4 1 1 1h4v-3h3v-3h2l1.4-1.4a6.5 6.5 0 1 0-4-4Z"/>
+                        <circle cx="16.5" cy="7.5" r=".5"/>
+                    </svg>
+                    Compte de test (démo)
                 </p>
                 <div class="text-xs text-yellow-700 space-y-1">
                     <p><strong>Email :</strong> test@mmm.com</p>

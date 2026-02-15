@@ -1,0 +1,21 @@
+{#
+    Shadcn Card Component
+#}
+
+<div class="rounded-lg border bg-card text-card-foreground shadow-sm {{ class|default('') }}">
+    {% if block('header') is defined %}
+        <div class="flex flex-col space-y-1.5 p-6">
+            {% block header %}{% endblock %}
+        </div>
+    {% endif %}
+    
+    <div class="p-6 pt-0">
+        {% block content %}{% endblock %}
+    </div>
+    
+    {% if block('footer') is defined %}
+        <div class="flex items-center p-6 pt-0">
+            {% block footer %}{% endblock %}
+        </div>
+    {% endif %}
+</div>

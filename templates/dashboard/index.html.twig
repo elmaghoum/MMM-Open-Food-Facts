@@ -5,182 +5,276 @@
 {% block main_class %}{% endblock %}
 
 {% block body %}
-<div class="flex h-screen bg-gray-50">
+<div class="flex h-[calc(100vh-3.5rem)] bg-background">
     {# Sidebar droite avec widgets disponibles #}
-    <div class="w-80 bg-white border-l border-gray-200 overflow-y-auto">
-        <div class="p-6">
-            <h2 class="text-xl font-bold mb-4">Widgets</h2>
+    <aside class="w-80 border-l bg-card overflow-y-auto">
+        <div class="p-6 space-y-4">
+            <div class="flex items-center justify-between">
+                <h2 class="text-lg font-semibold">Widgets</h2>
+            </div>
             
-            {# Widget Recherche Produit #}
-            <div class="mb-4 p-4 bg-blue-50 rounded-lg border-2 border-dashed border-blue-300 cursor-move hover:bg-blue-100 transition"
-                 draggable="true"
-                 data-widget-type="product_search">
-                <div class="flex items-center mb-2">
-                    <span class="text-2xl mr-2"></span>
-                    <h3 class="font-semibold">Recherche Produit</h3>
-                </div>
-                <p class="text-xs text-gray-600">Rechercher et afficher les détails d'un produit</p>
-            </div>
-
-
-            {# Widget Recherche Rapide par Code-barres #}
-            <div class="mb-4 p-4 bg-indigo-50 rounded-lg border-2 border-dashed border-indigo-300 cursor-move hover:bg-indigo-100 transition"
-                 draggable="true"
-                 data-widget-type="quick_barcode_search">
-                <div class="flex items-center mb-2">
-                    <span class="text-2xl mr-2"></span>
-                    <h3 class="font-semibold">Recherche Code-barres</h3>
-                </div>
-                <p class="text-xs text-gray-600">Recherche rapide par code-barres</p>
-            </div>
-
             {# Widget Liste de Course #}
-            <div class="mb-4 p-4 bg-orange-50 rounded-lg border-2 border-dashed border-orange-300 cursor-move hover:bg-orange-100 transition"
+            <div class="group relative rounded-lg border-2 border-dashed border-primary p-4 cursor-move hover:bg-accent transition-all"
                  draggable="true"
                  data-widget-type="shopping_list">
-                <div class="flex items-center mb-2">
-                    <span class="text-2xl mr-2"></span>
+                <div class="flex items-center gap-3 mb-2">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-100 text-orange-600 group-hover:bg-orange-200 transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="8" cy="21" r="1"/>
+                            <circle cx="19" cy="21" r="1"/>
+                            <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>
+                        </svg>
+                    </div>
                     <h3 class="font-semibold">Ma Liste de Course</h3>
                 </div>
-                <p class="text-xs text-gray-600">Mes produits favoris</p>
+                <p class="text-xs text-muted-foreground">Vos produits favoris</p>
+                {% include 'components/ui/badge.html.twig' with {label: 'Principal', variant: 'default', class: 'mt-2'} %}
+            </div>
+
+            {# Widget Recherche Produit #}
+            <div class="group relative rounded-lg border-2 border-dashed p-4 cursor-move hover:border-primary hover:bg-accent transition-all"
+                 draggable="true"
+                 data-widget-type="product_search">
+                <div class="flex items-center gap-3 mb-2">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 text-blue-600 group-hover:bg-blue-200 transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"/>
+                            <path d="m21 21-4.3-4.3"/>
+                        </svg>
+                    </div>
+                    <h3 class="font-semibold">Recherche Produit</h3>
+                </div>
+                <p class="text-xs text-muted-foreground">Afficher les détails d'un produit</p>
+            </div>
+
+            {# Widget Recherche Code-barres #}
+            <div class="group relative rounded-lg border-2 border-dashed p-4 cursor-move hover:border-primary hover:bg-accent transition-all"
+                 draggable="true"
+                 data-widget-type="quick_barcode_search">
+                <div class="flex items-center gap-3 mb-2">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600 group-hover:bg-indigo-200 transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 5v14"/>
+                            <path d="M8 5v14"/>
+                            <path d="M12 5v14"/>
+                            <path d="M17 5v14"/>
+                            <path d="M21 5v14"/>
+                        </svg>
+                    </div>
+                    <h3 class="font-semibold">Code-barres</h3>
+                </div>
+                <p class="text-xs text-muted-foreground">Recherche rapide par code-barres</p>
             </div>
 
             {# Widget Comparaison Sucre/Sel #}
-            <div class="mb-4 p-4 bg-green-50 rounded-lg border-2 border-dashed border-green-300 cursor-move hover:bg-green-100 transition"
+            <div class="group relative rounded-lg border-2 border-dashed p-4 cursor-move hover:border-primary hover:bg-accent transition-all"
                  draggable="true"
                  data-widget-type="sugar_salt_comparison">
-                <div class="flex items-center mb-2">
-                    <span class="text-2xl mr-2"></span>
+                <div class="flex items-center gap-3 mb-2">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-green-100 text-green-600 group-hover:bg-green-200 transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" x2="12" y1="20" y2="10"/>
+                            <line x1="18" x2="18" y1="20" y2="4"/>
+                            <line x1="6" x2="6" y1="20" y2="16"/>
+                        </svg>
+                    </div>
                     <h3 class="font-semibold">Sucre et Sel</h3>
                 </div>
-                <p class="text-xs text-gray-600">Comparer le sucre et sel (1-5 produits)</p>
+                <p class="text-xs text-muted-foreground">Comparer sucre et sel (1-5 produits)</p>
             </div>
 
             {# Widget Comparaison Nutriscore #}
-            <div class="mb-4 p-4 bg-yellow-50 rounded-lg border-2 border-dashed border-yellow-300 cursor-move hover:bg-yellow-100 transition"
+            <div class="group relative rounded-lg border-2 border-dashed p-4 cursor-move hover:border-primary hover:bg-accent transition-all"
                  draggable="true"
                  data-widget-type="nutriscore_comparison">
-                <div class="flex items-center mb-2">
-                    <span class="text-2xl mr-2"></span>
+                <div class="flex items-center gap-3 mb-2">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-yellow-100 text-yellow-600 group-hover:bg-yellow-200 transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/>
+                            <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/>
+                            <path d="M4 22h16"/>
+                            <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/>
+                            <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/>
+                            <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>
+                        </svg>
+                    </div>
                     <h3 class="font-semibold">Nutriscore</h3>
                 </div>
-                <p class="text-xs text-gray-600">Comparer les Nutriscores (1-5 produits)</p>
+                <p class="text-xs text-muted-foreground">Comparer Nutriscores (1-5 produits)</p>
             </div>
 
             {# Widget Comparaison NOVA #}
-            <div class="mb-4 p-4 bg-purple-50 rounded-lg border-2 border-dashed border-purple-300 cursor-move hover:bg-purple-100 transition"
+            <div class="group relative rounded-lg border-2 border-dashed p-4 cursor-move hover:border-primary hover:bg-accent transition-all"
                  draggable="true"
                  data-widget-type="nova_comparison">
-                <div class="flex items-center mb-2">
-                    <span class="text-2xl mr-2"></span>
+                <div class="flex items-center gap-3 mb-2">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-100 text-purple-600 group-hover:bg-purple-200 transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/>
+                        </svg>
+                    </div>
                     <h3 class="font-semibold">NOVA</h3>
                 </div>
-                <p class="text-xs text-gray-600">Comparer les scores NOVA (1-5 produits)</p>
+                <p class="text-xs text-muted-foreground">Comparer scores NOVA (1-5 produits)</p>
             </div>
 
             {# Widget Nutrition Pie #}
-            <div class="mb-4 p-4 bg-pink-50 rounded-lg border-2 border-dashed border-pink-300 cursor-move hover:bg-pink-100 transition"
+            <div class="group relative rounded-lg border-2 border-dashed p-4 cursor-move hover:border-primary hover:bg-accent transition-all"
                  draggable="true"
                  data-widget-type="nutrition_pie">
-                <div class="flex items-center mb-2">
-                    <span class="text-2xl mr-2"></span>
+                <div class="flex items-center gap-3 mb-2">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-pink-100 text-pink-600 group-hover:bg-pink-200 transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21.21 15.89A10 10 0 1 1 8 2.83"/>
+                            <path d="M22 12A10 10 0 0 0 12 2v10z"/>
+                        </svg>
+                    </div>
                     <h3 class="font-semibold">Nutrition Pie</h3>
                 </div>
-                <p class="text-xs text-gray-600">Graphique nutritionnel d'un produit</p>
+                <p class="text-xs text-muted-foreground">Graphique nutritionnel</p>
             </div>
-            
-            {# Widget fixe "Bientôt" en bas #}
-            <div class="col-span-2 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg border-2 border-purple-200 p-6 text-center"
-                 style="height: 150px;">
-                <div class="flex items-center justify-center h-full">
-                    <div>
-                        <div class="text-4xl mb-2"></div>
-                        <h3 class="text-xl font-semibold text-gray-700 mb-1">D'autres widgets arrivent bientôt !</h3>
-                        <p class="text-sm text-gray-500">Restez connectés pour découvrir les nouvelles fonctionnalités</p>
+        </div>
+    </aside>
+
+    {# Zone dashboard principale #}
+    <div class="flex-1 overflow-y-auto">
+        <div class="p-6 space-y-6">
+            {# Header #}
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold tracking-tight">Mon Dashboard</h1>
+                    <p class="text-muted-foreground">Glissez-déposez les widgets depuis la barre latérale</p>
+                </div>
+                {% if dashboard and dashboard.widgets|length > 0 %}
+                    <div class="text-sm text-muted-foreground">
+                        {% include 'components/ui/badge.html.twig' with {
+                            label: (dashboard and dashboard.widgets|length > 0 ? dashboard.widgets|length : 0) ~ ' / 10',
+                            variant: 'secondary'
+                        } %}
                     </div>
-                </div>
+                {% endif %}
             </div>
-        </div>
-    </div>
 
-    {# Zone de dashboard principale #}
-    <div class="flex-1 p-6 overflow-y-auto">
-        <div class="mb-6 flex items-center justify-between">
-            <div>
-                <h1 class="text-3xl font-bold">Mon Dashboard</h1>
-                <p class="text-gray-600">Glissez-déposez les widgets depuis la barre latérale</p>
-            </div>
-            {% if dashboard and dashboard.widgets|length > 0 %}
-                <div class="text-sm text-gray-500">
-                    {{ dashboard.widgets|length }} / 10 widgets
-                </div>
-            {% endif %}
-        </div>
+            {# Grille Dashboard #}
+            <div id="dashboard-grid" 
+                 class="grid grid-cols-2 gap-4 min-h-[600px] rounded-lg border-2 border-dashed border-muted-foreground/25 p-4 transition-colors hover:border-primary/50"
+                 style="grid-auto-rows: 400px;">
+                
+                {% if dashboard and dashboard.widgets|length > 0 %}
+                    {% for widget in dashboard.widgets %}
+                        {% embed 'components/ui/card.html.twig' with {
+                            class: 'widget-container transition-shadow hover:shadow-lg'
+                        } %}
+                            {% block header %}
+                                <div class="flex items-center justify-between">
+                                    <h3 class="font-semibold text-lg flex items-center gap-2">
+                                        {% if widget.type.value == 'product_search' %}
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-600"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                                            Recherche
+                                        {% elseif widget.type.value == 'quick_barcode_search' %}
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-600"><path d="M3 5v14"/><path d="M8 5v14"/><path d="M12 5v14"/><path d="M17 5v14"/><path d="M21 5v14"/></svg>
+                                            Code-barres
+                                        {% elseif widget.type.value == 'sugar_salt_comparison' %}
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-green-600"><line x1="12" x2="12" y1="20" y2="10"/><line x1="18" x2="18" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="16"/></svg>
+                                            Sucre et Sel
+                                        {% elseif widget.type.value == 'nutriscore_comparison' %}
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-yellow-600"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+                                            Nutriscore
+                                        {% elseif widget.type.value == 'nova_comparison' %}
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-600"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                                            NOVA
+                                        {% elseif widget.type.value == 'nutrition_pie' %}
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-pink-600"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
+                                            Nutrition
+                                        {% elseif widget.type.value == 'shopping_list' %}
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-orange-600"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
+                                            Liste de Course
+                                        {% endif %}
+                                    </h3>
+                                    <div class="flex items-center gap-1">
+                                        <button class="edit-widget inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-9 w-9" 
+                                                data-widget-id="{{ widget.id.toRfc4122 }}"
+                                                data-widget-type="{{ widget.type.value }}"
+                                                data-configuration='{{ widget.configuration|json_encode }}'>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+                                                <circle cx="12" cy="12" r="3"/>
+                                            </svg>
+                                        </button>
+                                        <button class="remove-widget inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-destructive hover:text-destructive-foreground h-9 w-9" 
+                                                data-widget-id="{{ widget.id.toRfc4122 }}">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M18 6 6 18"/>
+                                                <path d="m6 6 12 12"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            {% endblock %}
 
-        {# Grille Dashboard - Hauteur adaptative, 2 colonnes, widgets hauteur 400px #}
-        <div id="dashboard-grid" 
-             class="relative bg-gray-100 rounded-lg p-4 border-2 border-dashed border-gray-300 grid grid-cols-2 gap-4"
-             style="grid-auto-rows: 400px;">
-            
-            {% if dashboard and dashboard.widgets|length > 0 %}
-                {% for widget in dashboard.widgets %}
-                    <div class="widget-container bg-white rounded-lg border-2 border-gray-200 p-4 shadow-sm hover:shadow-md transition"
-                         style="min-width: 500px height: 400px;"
-                         data-widget-id="{{ widget.id.toRfc4122 }}"
-                         data-widget-type="{{ widget.type.value }}"
-                         data-row="{{ widget.row }}"
-                         data-column="{{ widget.column }}">
-                        
-                        <div class="flex items-center justify-between mb-3">
-                            <h3 class="font-semibold text-lg">
-                                {% if widget.type.value == 'product_search' %}Recherche
-                                {% elseif widget.type.value == 'quick_barcode_search' %}Code-barres
-                                {% elseif widget.type.value == 'shopping_list' %}Liste de Course
-                                {% elseif widget.type.value == 'sugar_salt_comparison' %}Sucre et Sel
-                                {% elseif widget.type.value == 'nutriscore_comparison' %}Nutriscore
-                                {% elseif widget.type.value == 'nova_comparison' %}NOVA
-                                {% elseif widget.type.value == 'nutrition_pie' %}Nutrition
-                                {% endif %}
-                            </h3>
-                            <div class="flex items-center gap-2">
-                                <button class="edit-widget text-blue-500 hover:text-blue-700 text-xl" 
-                                        data-widget-id="{{ widget.id.toRfc4122 }}"
-                                        data-widget-type="{{ widget.type.value }}"
-                                        data-configuration='{{ widget.configuration|json_encode }}'>
-                                    ⚙️
-                                </button>
-                                <button class="remove-widget text-red-500 hover:text-red-700 font-bold text-xl" 
-                                        data-widget-id="{{ widget.id.toRfc4122 }}">
-                                    ×
-                                </button>
+                            {% block content %}
+                                <div class="widget-content overflow-auto h-[280px]" 
+                                     id="widget-content-{{ widget.id.toRfc4122 }}"
+                                     data-widget-id="{{ widget.id.toRfc4122 }}"
+                                     data-widget-type="{{ widget.type.value }}"
+                                     data-row="{{ widget.row }}"
+                                     data-column="{{ widget.column }}">
+                                    <div class="flex items-center justify-center h-full">
+                                        <div class="flex flex-col items-center gap-2 text-muted-foreground">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="animate-spin">
+                                                <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+                                            </svg>
+                                            <p class="text-sm">Chargement...</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endblock %}
+                        {% endembed %}
+                    {% endfor %}
+
+                    {# Indication pour ajouter plus de widgets #}
+                    {% if dashboard.widgets|length < 8 %}
+                        <div class="col-span-2 flex items-center justify-center p-6 rounded-lg border-2 border-dashed border-muted-foreground/25 bg-muted/20">
+                            <div class="text-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto mb-2 text-muted-foreground">
+                                    <path d="M5 12h14"/>
+                                    <path d="M12 5v14"/>
+                                </svg>
+                                <p class="text-sm text-muted-foreground">
+                                    Vous pouvez ajouter encore <strong>{{ 10 - dashboard.widgets|length }} widget(s)</strong>
+                                </p>
                             </div>
                         </div>
-
-                        <div class="widget-content overflow-auto" 
-                             style="height: calc(100% - 50px);"
-                             id="widget-content-{{ widget.id.toRfc4122 }}">
-                            <p class="text-gray-500 text-center py-8">Chargement...</p>
+                    {% endif %}
+                {% else %}
+                    <div class="col-span-2 flex items-center justify-center min-h-[600px]">
+                        <div class="text-center max-w-md">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto mb-4 text-muted-foreground">
+                                <path d="M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z"/>
+                                <path d="m3 9 2.45-4.9A2 2 0 0 1 7.24 3h9.52a2 2 0 0 1 1.8 1.1L21 9"/>
+                                <path d="M12 3v6"/>
+                            </svg>
+                            <h3 class="text-xl font-semibold mb-2">Votre dashboard est vide</h3>
+                            <p class="text-muted-foreground mb-4">Commencez par glisser un widget depuis la barre latérale</p>
+                            <p class="text-sm text-muted-foreground">(Maximum 10 widgets)</p>
                         </div>
                     </div>
-                {% endfor %}
-                
-                {# Indication pour ajouter plus de widgets
-                {% if dashboard.widgets|length < 8 %}
-                    <div class="col-span-2 text-center py-6 border-2 border-dashed border-gray-300 rounded-lg bg-blue-50">
-                        <p class="text-gray-600 text-sm">
-                            ⬆️ Vous pouvez ajouter encore <strong>{{ 10 - dashboard.widgets|length }} widget(s)</strong> en glissant-déposant depuis la barre latérale
-                        </p>
-                    </div>
-                {% endif %} #}
-            {% else %}
-                <div class="col-span-2 flex items-center justify-center" style="min-height: 600px;">
-                    <div class="text-center">
-                        <div class="text-6xl mb-4"></div>
-                        <h3 class="text-xl font-semibold text-gray-700 mb-2">Glissez un widget ici</h3>
-                        <p class="text-gray-500">Commencez par glisser un widget depuis la barre latérale (max 10 widgets)</p>
-                    </div>
+                {% endif %}
+            </div>
+
+            {# Widget fixe "Bientôt" #}
+            <div class="rounded-lg border bg-gradient-to-r from-purple-50 to-pink-50 p-6 text-center">
+                <div class="flex items-center justify-center gap-2 mb-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-600">
+                        <path d="M15.686 15A14.5 14.5 0 0 1 12 22a14.5 14.5 0 0 1 0-20 10 10 0 1 0 9.542 13"/>
+                        <path d="M2 12h8.5"/>
+                        <path d="M20 6V4a2 2 0 1 0-4 0v2"/>
+                        <rect width="8" height="5" x="14" y="6" rx="1"/>
+                    </svg>
+                    <h3 class="text-xl font-semibold text-purple-900">D'autres widgets arrivent bientôt !</h3>
                 </div>
-            {% endif %}
+                <p class="text-sm text-purple-700">Restez connectés pour découvrir les nouvelles fonctionnalités</p>
+            </div>
         </div>
     </div>
 </div>

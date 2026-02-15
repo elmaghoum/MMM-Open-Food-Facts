@@ -1,0 +1,14 @@
+{#
+    Shadcn Table Component
+#}
+
+<div class="relative w-full overflow-auto">
+    <table class="w-full caption-bottom text-sm">
+        <thead class="[&_tr]:border-b">
+            {% block header %}{% endblock %}
+        </thead>
+        <tbody class="[&_tr:last-child]:border-0">
+            {% block body %}{% endblock %}
+        </tbody>
+    </table>
+</div>

@@ -75,7 +75,6 @@ final class TwoFactorController extends AbstractController
                     return $this->redirectToRoute('dashboard');
                 }
             }
-
             $this->addFlash('error', 'Code incorrect ou expiré.');
         }
 
