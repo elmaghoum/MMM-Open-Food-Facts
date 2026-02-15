@@ -13,146 +13,197 @@ final readonly class WidgetDataProvider
     ) {
     }
 
-    /**
-     * Génère les données pour un widget selon son type et sa configuration
-     */
     public function getDataForWidget(WidgetType $type, array $configuration): array
     {
         return match ($type) {
-            WidgetType::PIE_CHART, WidgetType::DOUGHNUT_CHART => $this->generatePieData($configuration),
-            WidgetType::BAR_CHART => $this->generateBarData($configuration),
-            WidgetType::LINE_CHART => $this->generateLineData($configuration),
-            WidgetType::RADAR_CHART => $this->generateRadarData($configuration),
-            WidgetType::POLAR_AREA_CHART => $this->generatePolarAreaData($configuration),
-            WidgetType::MIXED_CHART => $this->generateMixedData($configuration),
+            WidgetType::PRODUCT_SEARCH => $this->generateProductSearchData($configuration),
+            WidgetType::SUGAR_SALT_COMPARISON => $this->generateSugarSaltComparisonData($configuration),
+            WidgetType::NUTRISCORE_COMPARISON => $this->generateNutriscoreComparisonData($configuration),
+            WidgetType::NOVA_COMPARISON => $this->generateNovaComparisonData($configuration),
+            WidgetType::NUTRITION_PIE => $this->generateNutritionPieData($configuration),
         };
     }
 
-    private function generatePieData(array $config): array
+    private function generateProductSearchData(array $config): array
     {
-        $dataType = $config['data'] ?? 'nutriscore';
+        $barcode = $config['barcode'] ?? null;
+        
+        if (!$barcode) {
+            return ['error' => 'No barcode provided'];
+        }
 
-        if ($dataType === 'nutriscore') {
-            $stats = $this->openFoodFactsService->getNutriscoreStats(); 
-            
-            return [
-                'labels' => ['A', 'B', 'C', 'D', 'E'],
+        $product = $this->openFoodFactsService->getProductDetails($barcode);
+        
+        if (!$product) {
+            return ['error' => 'Product not found'];
+        }
+
+        return [
+            'type' => 'product_info',
+            'product' => [
+                'name' => $product['product_name'] ?? 'N/A',
+                'brands' => $product['brands'] ?? 'N/A',
+                'barcode' => $product['code'] ?? $barcode,
+                'nutriscore' => strtoupper($product['nutriscore_grade'] ?? 'N/A'),
+                'nova' => $product['nova_group'] ?? 'N/A',
+                'categories' => implode(', ', array_slice($product['categories_tags'] ?? [], 0, 3)),
+                'quantity' => $product['quantity'] ?? 'N/A',
+                'origins' => implode(', ', $product['origins_tags'] ?? ['N/A']),
+                'url' => $product['openfoodfacts_url'] ?? '#',
+            ],
+        ];
+    }
+
+    private function generateSugarSaltComparisonData(array $config): array
+    {
+        $barcodes = $config['barcodes'] ?? [];
+        
+        if (empty($barcodes) || count($barcodes) > 5) {
+            return ['error' => 'Provide between 1 and 5 barcodes'];
+        }
+
+        $products = $this->openFoodFactsService->getMultipleProducts($barcodes);
+        
+        $labels = [];
+        $sugarData = [];
+        $saltData = [];
+
+        foreach ($products as $product) {
+            $labels[] = $product['product_name'] ?? 'Unknown';
+            $sugarData[] = $product['nutriments']['sugars_100g'] ?? 0;
+            $saltData[] = $product['nutriments']['salt_100g'] ?? 0;
+        }
+
+        return [
+            'type' => 'bar',
+            'data' => [
+                'labels' => $labels,
                 'datasets' => [
                     [
-                        'data' => array_values($stats),
-                        'backgroundColor' => ['#038141', '#85BB2F', '#FECB02', '#EE8100', '#E63E11'],
+                        'label' => 'Sucre (g/100g)',
+                        'data' => $sugarData,
+                        'backgroundColor' => '#FF6384',
+                    ],
+                    [
+                        'label' => 'Sel (g/100g)',
+                        'data' => $saltData,
+                        'backgroundColor' => '#36A2EB',
                     ],
                 ],
+            ],
+        ];
+    }
+
+    private function generateNutriscoreComparisonData(array $config): array
+    {
+        $barcodes = $config['barcodes'] ?? [];
+        
+        if (empty($barcodes) || count($barcodes) > 5) {
+            return ['error' => 'Provide between 1 and 5 barcodes'];
+        }
+
+        $products = $this->openFoodFactsService->getMultipleProducts($barcodes);
+        
+        $comparison = [];
+        foreach ($products as $product) {
+            $comparison[] = [
+                'name' => $product['product_name'] ?? 'Unknown',
+                'brands' => $product['brands'] ?? 'N/A',
+                'barcode' => $product['code'] ?? 'N/A',
+                'nutriscore' => strtoupper($product['nutriscore_grade'] ?? 'N/A'),
+                'nutriscore_color' => $this->getNutriscoreColor($product['nutriscore_grade'] ?? ''),
             ];
         }
 
-        if ($dataType === 'nova') {
-            $stats = $this->openFoodFactsService->getNovaGroupStats(); 
-            
-            return [
-                'labels' => ['Group 1', 'Group 2', 'Group 3', 'Group 4'],
-                'datasets' => [
-                    [
-                        'data' => array_values($stats),
-                        'backgroundColor' => ['#4CAF50', '#FFC107', '#FF9800', '#F44336'],
-                    ],
-                ],
+        return [
+            'type' => 'nutriscore_comparison',
+            'products' => $comparison,
+        ];
+    }
+
+    private function generateNovaComparisonData(array $config): array
+    {
+        $barcodes = $config['barcodes'] ?? [];
+        
+        if (empty($barcodes) || count($barcodes) > 5) {
+            return ['error' => 'Provide between 1 and 5 barcodes'];
+        }
+
+        $products = $this->openFoodFactsService->getMultipleProducts($barcodes);
+        
+        $comparison = [];
+        foreach ($products as $product) {
+            $comparison[] = [
+                'name' => $product['product_name'] ?? 'Unknown',
+                'brands' => $product['brands'] ?? 'N/A',
+                'barcode' => $product['code'] ?? 'N/A',
+                'nova' => $product['nova_group'] ?? 'N/A',
+                'nova_color' => $this->getNovaColor($product['nova_group'] ?? 0),
             ];
         }
 
-        return ['labels' => [], 'datasets' => []];
+        return [
+            'type' => 'nova_comparison',
+            'products' => $comparison,
+        ];
     }
 
-    private function generateBarData(array $config): array
+    private function generateNutritionPieData(array $config): array
     {
-        $category = $config['category'] ?? null;
-        $nutriments = $this->openFoodFactsService->getAverageNutriments($category);
+        $barcode = $config['barcode'] ?? null;
+        
+        if (!$barcode) {
+            return ['error' => 'No barcode provided'];
+        }
+
+        $product = $this->openFoodFactsService->getProductDetails($barcode);
+        
+        if (!$product) {
+            return ['error' => 'Product not found'];
+        }
+
+        $nutriments = $product['nutriments'] ?? [];
 
         return [
-            'labels' => ['Energy', 'Fat', 'Carbs', 'Proteins', 'Salt'],
-            'datasets' => [
-                [
-                    'label' => 'Average per 100g',
-                    'data' => [
-                        $nutriments['energy'],
-                        $nutriments['fat'],
-                        $nutriments['carbohydrates'],
-                        $nutriments['proteins'],
-                        $nutriments['salt'],
+            'type' => 'pie',
+            'data' => [
+                'labels' => ['Protéines', 'Glucides', 'Lipides', 'Sel'],
+                'datasets' => [
+                    [
+                        'data' => [
+                            $nutriments['proteins_100g'] ?? 0,
+                            $nutriments['carbohydrates_100g'] ?? 0,
+                            $nutriments['fat_100g'] ?? 0,
+                            ($nutriments['salt_100g'] ?? 0) * 10, // Multiplier par 10 pour visibilité
+                        ],
+                        'backgroundColor' => ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0'],
                     ],
-                    'backgroundColor' => '#4CAF50',
                 ],
             ],
+            'product_name' => $product['product_name'] ?? 'Unknown',
         ];
     }
 
-    private function generateLineData(array $config): array
+    private function getNutriscoreColor(string $grade): string
     {
-        return [
-            'labels' => ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-            'datasets' => [
-                [
-                    'label' => 'Products scanned',
-                    'data' => [65, 59, 80, 81, 56, 55],
-                    'borderColor' => '#4CAF50',
-                    'fill' => false,
-                ],
-            ],
-        ];
+        return match (strtolower($grade)) {
+            'a' => '#038141',
+            'b' => '#85BB2F',
+            'c' => '#FECB02',
+            'd' => '#EE8100',
+            'e' => '#E63E11',
+            default => '#CCCCCC',
+        };
     }
 
-    private function generateRadarData(array $config): array
+    private function getNovaColor(int $nova): string
     {
-        $category = $config['category'] ?? null;
-        $nutriments = $this->openFoodFactsService->getAverageNutriments($category); 
-
-        return [
-            'labels' => ['Energy', 'Fat', 'Sat. Fat', 'Carbs', 'Sugars', 'Proteins', 'Salt'],
-            'datasets' => [
-                [
-                    'label' => 'Nutriments (avg)',
-                    'data' => [
-                        $nutriments['energy'] / 10,
-                        $nutriments['fat'],
-                        $nutriments['saturated_fat'],
-                        $nutriments['carbohydrates'],
-                        $nutriments['sugars'],
-                        $nutriments['proteins'],
-                        $nutriments['salt'] * 10,
-                    ],
-                    'backgroundColor' => 'rgba(76, 175, 80, 0.2)',
-                    'borderColor' => '#4CAF50',
-                ],
-            ],
-        ];
-    }
-
-    private function generatePolarAreaData(array $config): array
-    {
-        return $this->generatePieData($config);
-    }
-
-    private function generateMixedData(array $config): array
-    {
-        $nutriments = $this->openFoodFactsService->getAverageNutriments();  
-
-        return [
-            'labels' => ['Energy', 'Fat', 'Carbs', 'Proteins'],
-            'datasets' => [
-                [
-                    'type' => 'bar',
-                    'label' => 'Average',
-                    'data' => [$nutriments['energy'], $nutriments['fat'], $nutriments['carbohydrates'], $nutriments['proteins']],
-                    'backgroundColor' => '#4CAF50',
-                ],
-                [
-                    'type' => 'line',
-                    'label' => 'Trend',
-                    'data' => [$nutriments['energy'] * 0.9, $nutriments['fat'] * 1.1, $nutriments['carbohydrates'] * 0.95, $nutriments['proteins'] * 1.05],
-                    'borderColor' => '#FF9800',
-                    'fill' => false,
-                ],
-            ],
-        ];
+        return match ($nova) {
+            1 => '#4CAF50',
+            2 => '#FFC107',
+            3 => '#FF9800',
+            4 => '#F44336',
+            default => '#CCCCCC',
+        };
     }
 }

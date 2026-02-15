@@ -2,180 +2,155 @@
 
 {% block title %}Dashboard - MMM{% endblock %}
 
+{% block main_class %}{% endblock %}
+
 {% block body %}
-<div class="space-y-6">
-    <div class="flex items-center justify-between">
-        <div>
-            <h1 class="text-3xl font-bold">Mon Dashboard</h1>
-            <p class="text-muted-foreground">Analysez vos données nutritionnelles</p>
+<div class="flex h-screen bg-gray-50">
+    {# Sidebar droite avec widgets disponibles #}
+    <div class="w-80 bg-white border-l border-gray-200 overflow-y-auto">
+        <div class="p-6">
+            <h2 class="text-xl font-bold mb-4">Widgets</h2>
+            
+            {# Widget Recherche Produit #}
+            <div class="mb-4 p-4 bg-blue-50 rounded-lg border-2 border-dashed border-blue-300 cursor-move hover:bg-blue-100 transition"
+                 draggable="true"
+                 data-widget-type="product_search">
+                <div class="flex items-center mb-2">
+                    <span class="text-2xl mr-2"></span>
+                    <h3 class="font-semibold">Recherche Produit</h3>
+                </div>
+                <p class="text-xs text-gray-600">Rechercher et afficher les détails d'un produit</p>
+            </div>
+
+            {# Widget Comparaison Sucre/Sel #}
+            <div class="mb-4 p-4 bg-green-50 rounded-lg border-2 border-dashed border-green-300 cursor-move hover:bg-green-100 transition"
+                 draggable="true"
+                 data-widget-type="sugar_salt_comparison">
+                <div class="flex items-center mb-2">
+                    <span class="text-2xl mr-2"></span>
+                    <h3 class="font-semibold">Sucre et Sel</h3>
+                </div>
+                <p class="text-xs text-gray-600">Comparer le sucre et sel (1-5 produits)</p>
+            </div>
+
+            {# Widget Comparaison Nutriscore #}
+            <div class="mb-4 p-4 bg-yellow-50 rounded-lg border-2 border-dashed border-yellow-300 cursor-move hover:bg-yellow-100 transition"
+                 draggable="true"
+                 data-widget-type="nutriscore_comparison">
+                <div class="flex items-center mb-2">
+                    <span class="text-2xl mr-2"></span>
+                    <h3 class="font-semibold">Nutriscore</h3>
+                </div>
+                <p class="text-xs text-gray-600">Comparer les Nutriscores (1-5 produits)</p>
+            </div>
+
+            {# Widget Comparaison NOVA #}
+            <div class="mb-4 p-4 bg-purple-50 rounded-lg border-2 border-dashed border-purple-300 cursor-move hover:bg-purple-100 transition"
+                 draggable="true"
+                 data-widget-type="nova_comparison">
+                <div class="flex items-center mb-2">
+                    <span class="text-2xl mr-2"></span>
+                    <h3 class="font-semibold">NOVA</h3>
+                </div>
+                <p class="text-xs text-gray-600">Comparer les scores NOVA (1-5 produits)</p>
+            </div>
+
+            {# Widget Nutrition Pie #}
+            <div class="mb-4 p-4 bg-pink-50 rounded-lg border-2 border-dashed border-pink-300 cursor-move hover:bg-pink-100 transition"
+                 draggable="true"
+                 data-widget-type="nutrition_pie">
+                <div class="flex items-center mb-2">
+                    <span class="text-2xl mr-2"></span>
+                    <h3 class="font-semibold">Nutrition Pie</h3>
+                </div>
+                <p class="text-xs text-gray-600">Graphique nutritionnel d'un produit</p>
+            </div>
         </div>
-        <button id="add-widget-btn" class="btn btn-primary">
-            + Ajouter un widget
-        </button>
     </div>
 
-    {% if dashboard and dashboard.widgets|length > 0 %}
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="dashboard-grid">
-            {% for widget in dashboard.widgets %}
-                <div class="card widget-card" 
-                     data-widget-id="{{ widget.id.toRfc4122 }}"
-                     data-row="{{ widget.row }}"
-                     data-column="{{ widget.column }}"
-                     style="grid-column: {{ widget.column }}; grid-row: {{ widget.row }};">
-                    <div class="card-header">
-                        <div class="flex items-center justify-between">
-                            <h3 class="card-title text-lg">
-                                {% if widget.type.value == 'pie_chart' %} Graphique Circulaire
-                                {% elseif widget.type.value == 'bar_chart' %} Graphique en Barres
-                                {% elseif widget.type.value == 'line_chart' %} Graphique Linéaire
-                                {% elseif widget.type.value == 'radar_chart' %} Graphique Radar
-                                {% elseif widget.type.value == 'doughnut_chart' %} Graphique Donut
-                                {% elseif widget.type.value == 'polar_area_chart' %} Aire Polaire
-                                {% elseif widget.type.value == 'mixed_chart' %} Graphique Mixte
+    {# Zone de dashboard principale #}
+    <div class="flex-1 p-6 overflow-y-auto">
+        <div class="mb-6 flex items-center justify-between">
+            <div>
+                <h1 class="text-3xl font-bold">Mon Dashboard</h1>
+                <p class="text-gray-600">Glissez-déposez les widgets depuis la barre latérale</p>
+            </div>
+            {% if dashboard and dashboard.widgets|length > 0 %}
+                <div class="text-sm text-gray-500">
+                    {{ dashboard.widgets|length }} / 10 widgets
+                </div>
+            {% endif %}
+        </div>
+
+        {# Grille Dashboard - Hauteur adaptative, 2 colonnes, widgets hauteur 400px #}
+        <div id="dashboard-grid" 
+             class="relative bg-gray-100 rounded-lg p-4 border-2 border-dashed border-gray-300 grid grid-cols-2 gap-4"
+             style="grid-auto-rows: 400px;">
+            
+            {% if dashboard and dashboard.widgets|length > 0 %}
+                {% for widget in dashboard.widgets %}
+                    <div class="widget-container bg-white rounded-lg border-2 border-gray-200 p-4 shadow-sm hover:shadow-md transition"
+                         style="min-width: 650px; height: 400px;"
+                         data-widget-id="{{ widget.id.toRfc4122 }}"
+                         data-widget-type="{{ widget.type.value }}"
+                         data-row="{{ widget.row }}"
+                         data-column="{{ widget.column }}">
+                        
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="font-semibold text-lg">
+                                {% if widget.type.value == 'product_search' %}Recherche
+                                {% elseif widget.type.value == 'sugar_salt_comparison' %}Sucre et Sel
+                                {% elseif widget.type.value == 'nutriscore_comparison' %}Nutriscore
+                                {% elseif widget.type.value == 'nova_comparison' %}NOVA
+                                {% elseif widget.type.value == 'nutrition_pie' %}Nutrition
                                 {% endif %}
                             </h3>
-                            <button class="text-destructive hover:text-destructive/80 text-sm">
-                                Supprimer
-                            </button>
+                            <div class="flex items-center gap-2">
+                                <button class="edit-widget text-blue-500 hover:text-blue-700 text-xl" 
+                                        data-widget-id="{{ widget.id.toRfc4122 }}"
+                                        data-widget-type="{{ widget.type.value }}"
+                                        data-configuration='{{ widget.configuration|json_encode }}'>
+                                    ⚙️
+                                </button>
+                                <button class="remove-widget text-red-500 hover:text-red-700 font-bold text-xl" 
+                                        data-widget-id="{{ widget.id.toRfc4122 }}">
+                                    ×
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="widget-content overflow-auto" 
+                             style="height: calc(100% - 50px);"
+                             id="widget-content-{{ widget.id.toRfc4122 }}">
+                            <p class="text-gray-500 text-center py-8">Chargement...</p>
                         </div>
                     </div>
-                    <div class="card-content">
-                        <div class="h-64 flex items-center justify-center">
-                            <canvas id="chart-{{ widget.id.toRfc4122 }}"></canvas>
-                        </div>
+                {% endfor %}
+                
+                {# Indication pour ajouter plus de widgets
+                {% if dashboard.widgets|length < 8 %}
+                    <div class="col-span-2 text-center py-6 border-2 border-dashed border-gray-300 rounded-lg bg-blue-50">
+                        <p class="text-gray-600 text-sm">
+                            ⬆️ Vous pouvez ajouter encore <strong>{{ 10 - dashboard.widgets|length }} widget(s)</strong> en glissant-déposant depuis la barre latérale
+                        </p>
+                    </div>
+                {% endif %} #}
+            {% else %}
+                <div class="col-span-2 flex items-center justify-center" style="min-height: 600px;">
+                    <div class="text-center">
+                        <div class="text-6xl mb-4"></div>
+                        <h3 class="text-xl font-semibold text-gray-700 mb-2">Glissez un widget ici</h3>
+                        <p class="text-gray-500">Commencez par glisser un widget depuis la barre latérale (max 10 widgets)</p>
                     </div>
                 </div>
-            {% endfor %}
-        </div>
-    {% else %}
-        <div class="card">
-            <div class="card-content text-center py-12">
-                <div class="text-6xl mb-4"></div>
-                <h3 class="text-xl font-semibold mb-2">Aucun widget</h3>
-                <p class="text-muted-foreground mb-4">
-                    Commencez par ajouter un widget pour visualiser vos données
-                </p>
-                <button id="add-widget-btn-empty" class="btn btn-primary">
-                    + Ajouter mon premier widget
-                </button>
-            </div>
-        </div>
-    {% endif %}
-</div>
-
-{# Modal d'ajout de widget #}
-<div id="add-widget-modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-    <div class="card max-w-lg w-full mx-4">
-        <div class="card-header">
-            <h3 class="card-title">Ajouter un widget</h3>
-        </div>
-        <div class="card-content space-y-4">
-            <div>
-                <label class="form-label">Type de graphique</label>
-                <select id="widget-type" class="form-control">
-                    <option value="pie_chart"> Graphique Circulaire</option>
-                    <option value="doughnut_chart"> Graphique Donut</option>
-                    <option value="bar_chart"> Graphique en Barres</option>
-                    <option value="line_chart"> Graphique Linéaire</option>
-                    <option value="radar_chart"> Graphique Radar</option>
-                    <option value="polar_area_chart"> Aire Polaire</option>
-                    <option value="mixed_chart"> Graphique Mixte</option>
-                </select>
-            </div>
-
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <label class="form-label">Ligne</label>
-                    <input type="number" id="widget-row" class="form-control" min="1" value="1">
-                </div>
-                <div>
-                    <label class="form-label">Colonne</label>
-                    <select id="widget-column" class="form-control">
-                        <option value="1">Colonne 1</option>
-                        <option value="2">Colonne 2</option>
-                    </select>
-                </div>
-            </div>
-
-            <div>
-                <label class="form-label">Données</label>
-                <select id="widget-data" class="form-control">
-                    <option value="nutriscore">Nutriscore</option>
-                    <option value="nova">Groupe NOVA</option>
-                </select>
-            </div>
-
-            <div class="flex gap-2">
-                <button id="add-widget-confirm" class="btn btn-primary flex-1">
-                    Ajouter
-                </button>
-                <button id="add-widget-cancel" class="btn btn-secondary flex-1">
-                    Annuler
-                </button>
-            </div>
+            {% endif %}
         </div>
     </div>
 </div>
 {% endblock %}
+
 {% block javascripts %}
     {{ parent() }}
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <script>
-        // test de chart.js en guise de widgets
-        // Charger les données et créer les graphiques
-        document.querySelectorAll('.widget-card').forEach(card => {
-            const widgetId = card.dataset.widgetId;
-            const canvas = document.getElementById(`chart-${widgetId}`);
-            
-            fetch(`/dashboard/widget/${widgetId}/data`)
-                .then(res => res.json())
-                .then(data => {
-                    new Chart(canvas, {
-                        type: data.datasets[0].type || 'pie',
-                        data: data,
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: true,
-                        }
-                    });
-                });
-        });
-
-        // Modal de widget
-        const modal = document.getElementById('add-widget-modal');
-        const openButtons = document.querySelectorAll('#add-widget-btn, #add-widget-btn-empty');
-        const closeButton = document.getElementById('add-widget-cancel');
-        const confirmButton = document.getElementById('add-widget-confirm');
-
-        openButtons.forEach(btn => {
-            btn?.addEventListener('click', () => modal.classList.remove('hidden'));
-        });
-
-        closeButton?.addEventListener('click', () => modal.classList.add('hidden'));
-
-        confirmButton?.addEventListener('click', async () => {
-            const type = document.getElementById('widget-type').value;
-            const row = parseInt(document.getElementById('widget-row').value);
-            const column = parseInt(document.getElementById('widget-column').value);
-            const data = document.getElementById('widget-data').value;
-
-            const response = await fetch('/dashboard/widget/add', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    type,
-                    row,
-                    column,
-                    configuration: { data }
-                })
-            });
-
-            if (response.ok) {
-                location.reload();
-            } else {
-                const error = await response.json();
-                alert(error.error);
-            }
-        });
-    </script>
+    {{ encore_entry_script_tags('dashboard') }}
 {% endblock %}

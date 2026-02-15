@@ -6,11 +6,9 @@ namespace Domain\Dashboard\ValueObject;
 
 enum WidgetType: string
 {
-    case PIE_CHART = 'pie_chart';
-    case DOUGHNUT_CHART = 'doughnut_chart';
-    case BAR_CHART = 'bar_chart';
-    case LINE_CHART = 'line_chart';
-    case RADAR_CHART = 'radar_chart';
-    case POLAR_AREA_CHART = 'polar_area_chart';
-    case MIXED_CHART = 'mixed_chart';
+    case PRODUCT_SEARCH = 'product_search';
+    case SUGAR_SALT_COMPARISON = 'sugar_salt_comparison';
+    case NUTRISCORE_COMPARISON = 'nutriscore_comparison';
+    case NOVA_COMPARISON = 'nova_comparison';
+    case NUTRITION_PIE = 'nutrition_pie';
 }

@@ -7,7 +7,9 @@ namespace Application\Dashboard\Handler;
 use Application\Dashboard\Command\AddWidgetCommand;
 use Application\Dashboard\DTO\AddWidgetResult;
 use Domain\Dashboard\Entity\Dashboard;
+use Domain\Dashboard\Entity\Widget;
 use Domain\Dashboard\Repository\DashboardRepositoryInterface;
+use Symfony\Component\Uid\Uuid;
 
 final readonly class AddWidgetHandler
 {
@@ -18,26 +20,35 @@ final readonly class AddWidgetHandler
 
     public function handle(AddWidgetCommand $command): AddWidgetResult
     {
-        try {
-            $dashboard = $this->dashboardRepository->findByUserId($command->userId);
+        $dashboard = $this->dashboardRepository->findByUserId($command->userId);
 
-            // Créer le dashboard s'il n'existe pas
-            if (!$dashboard) {
-                $dashboard = Dashboard::create($command->userId);
+        if (!$dashboard) {
+            $dashboard = new Dashboard(Uuid::v4(), $command->userId);
+        }
+
+        try {
+            // Vérifier si la position est déjà occupée
+            foreach ($dashboard->getWidgets() as $existingWidget) {
+                if ($existingWidget->getRow() === $command->row && 
+                    $existingWidget->getColumn() === $command->column) {
+                    return AddWidgetResult::failure('Position déjà occupée');
+                }
             }
 
-            $widget = $dashboard->addWidget(
+            $widget = new Widget(
+                id: Uuid::v4(),
+                dashboard: $dashboard,
                 type: $command->type,
                 row: $command->row,
                 column: $command->column,
                 configuration: $command->configuration
             );
 
+            $dashboard->addWidget($widget);
             $this->dashboardRepository->save($dashboard);
 
             return AddWidgetResult::success($widget->getId());
-
-        } catch (\DomainException $e) {
+        } catch (\Exception $e) {
             return AddWidgetResult::failure($e->getMessage());
         }
     }

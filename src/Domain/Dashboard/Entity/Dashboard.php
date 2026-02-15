@@ -9,8 +9,6 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Domain\Dashboard\Exception\WidgetNotFoundException;
 use Domain\Dashboard\Exception\WidgetPositionAlreadyOccupiedException;
-use Domain\Dashboard\ValueObject\WidgetPosition;
-use Domain\Dashboard\ValueObject\WidgetType;
 use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity]
@@ -33,10 +31,8 @@ class Dashboard
     #[ORM\Column(name: 'updated_at', type: 'datetime_immutable')]
     private \DateTimeImmutable $updatedAt;
 
-    private function __construct(
-        Uuid $id,
-        Uuid $userId,
-    ) {
+    public function __construct(Uuid $id, Uuid $userId)
+    {
         $this->id = $id;
         $this->userId = $userId;
         $this->widgets = new ArrayCollection();
@@ -70,40 +66,35 @@ class Dashboard
         return $this->widgets->toArray();
     }
 
-    public function addWidget(
-        WidgetType $type,
-        int $row,
-        int $column,
-        array $configuration
-    ): Widget {
-        $position = WidgetPosition::at($row, $column);
-        $this->ensurePositionIsAvailable($position);
-
-        $widget = new Widget(
-            id: Uuid::v4(),
-            dashboard: $this,
-            type: $type,
-            row: $row,
-            column: $column,
-            configuration: $configuration,
-        );
+    public function addWidget(Widget $widget): void
+    {
+        // Vérifier que la position n'est pas déjà occupée
+        foreach ($this->widgets as $existingWidget) {
+            if ($existingWidget->getRow() === $widget->getRow() && 
+                $existingWidget->getColumn() === $widget->getColumn()) {
+                throw new WidgetPositionAlreadyOccupiedException(
+                    sprintf('Position (%d, %d) already occupied', $widget->getRow(), $widget->getColumn())
+                );
+            }
+        }
 
         $this->widgets->add($widget);
         $this->updatedAt = new \DateTimeImmutable();
-
-        return $widget;
     }
 
     public function removeWidget(Uuid $widgetId): void
     {
-        $widget = $this->findWidget($widgetId);
-        
-        if (!$widget) {
-            throw WidgetNotFoundException::withId($widgetId);
+        foreach ($this->widgets as $widget) {
+            if ($widget->getId()->equals($widgetId)) {
+                $this->widgets->removeElement($widget);
+                $this->updatedAt = new \DateTimeImmutable();
+                return;
+            }
         }
 
-        $this->widgets->removeElement($widget);
-        $this->updatedAt = new \DateTimeImmutable();
+        throw new WidgetNotFoundException(
+            sprintf('Widget with ID %s not found', $widgetId->toRfc4122())
+        );
     }
 
     public function moveWidget(Uuid $widgetId, int $newRow, int $newColumn): void
@@ -111,27 +102,27 @@ class Dashboard
         $widget = $this->findWidget($widgetId);
         
         if (!$widget) {
-            throw WidgetNotFoundException::withId($widgetId);
+            throw new WidgetNotFoundException(
+                sprintf('Widget with ID %s not found', $widgetId->toRfc4122())
+            );
         }
 
-        $newPosition = WidgetPosition::at($newRow, $newColumn);
-        $this->ensurePositionIsAvailable($newPosition, $widgetId);
+        // Vérifier que la nouvelle position n'est pas occupée (sauf par ce widget)
+        foreach ($this->widgets as $existingWidget) {
+            if ($existingWidget->getId()->equals($widgetId)) {
+                continue; // Ignorer le widget qu'on déplace
+            }
+
+            if ($existingWidget->getRow() === $newRow && 
+                $existingWidget->getColumn() === $newColumn) {
+                throw new WidgetPositionAlreadyOccupiedException(
+                    sprintf('Position (%d, %d) already occupied', $newRow, $newColumn)
+                );
+            }
+        }
 
         $widget->moveTo($newRow, $newColumn);
         $this->updatedAt = new \DateTimeImmutable();
-    }
-
-    private function ensurePositionIsAvailable(WidgetPosition $position, ?Uuid $excludeWidgetId = null): void
-    {
-        foreach ($this->widgets as $widget) {
-            if ($excludeWidgetId && $widget->getId()->equals($excludeWidgetId)) {
-                continue;
-            }
-
-            if ($widget->getPosition()->equals($position)) {
-                throw WidgetPositionAlreadyOccupiedException::at($position->row, $position->column);
-            }
-        }
     }
 
     private function findWidget(Uuid $widgetId): ?Widget

@@ -9,6 +9,7 @@ Encore
     .setPublicPath('/build')
     
     .addEntry('app', './assets/app.js')
+    .addEntry('dashboard', './assets/js/dashboard.js')
     
     .splitEntryChunks()
     .enableSingleRuntimeChunk()
@@ -23,7 +24,6 @@ Encore
         config.corejs = 3;
     })
     
-    // PostCSS pour Tailwind
     .enablePostCssLoader()
 ;
 

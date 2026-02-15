@@ -1,8 +1,10 @@
 security:
+    # Password hasher
     password_hashers:
         Domain\Identity\Entity\User:
             algorithm: auto
 
+    # Provider personnalisé
     providers:
         app_user_provider:
             id: Infrastructure\Security\UserProvider
@@ -16,21 +18,12 @@ security:
             lazy: true
             provider: app_user_provider
             
-            form_login:
-                login_path: login
-                check_path: login
-                enable_csrf: true
-                default_target_path: two_factor
-            
+            # Logout seulement
             logout:
                 path: logout
                 target: logout_success
 
-            # Remember me pour le futur (bonus)
-            remember_me:
-                secret: '%kernel.secret%'
-                lifetime: 604800
-
+    # Contrôle d'accès
     access_control:
         - { path: ^/login, roles: PUBLIC_ACCESS }
         - { path: ^/two-factor, roles: PUBLIC_ACCESS }

@@ -6,114 +6,145 @@ namespace App\Tests\Unit\Domain\Dashboard;
 
 use Domain\Dashboard\Entity\Dashboard;
 use Domain\Dashboard\Entity\Widget;
+use Domain\Dashboard\Exception\WidgetNotFoundException;
 use Domain\Dashboard\Exception\WidgetPositionAlreadyOccupiedException;
-use Domain\Dashboard\Exception\InvalidWidgetPositionException;
 use Domain\Dashboard\ValueObject\WidgetType;
-use Domain\Dashboard\ValueObject\WidgetPosition;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Uid\Uuid;
 
 final class DashboardTest extends TestCase
 {
-    public function testDashboardCanBeCreated(): void
+    public function testCreateDashboard(): void
     {
         $userId = Uuid::v4();
-        $dashboard = Dashboard::create($userId);
+        $dashboard = new Dashboard(Uuid::v4(), $userId);
 
-        $this->assertInstanceOf(Dashboard::class, $dashboard);
         $this->assertEquals($userId, $dashboard->getUserId());
         $this->assertCount(0, $dashboard->getWidgets());
     }
 
-    public function testWidgetCanBeAddedToDashboard(): void
+    public function testAddWidget(): void
     {
-        $dashboard = Dashboard::create(Uuid::v4());
-
-        $widget = $dashboard->addWidget(
-            type: WidgetType::PIE_CHART,
+        $dashboard = new Dashboard(Uuid::v4(), Uuid::v4());
+        
+        $widget = new Widget(
+            id: Uuid::v4(),
+            dashboard: $dashboard,
+            type: WidgetType::PRODUCT_SEARCH,
             row: 1,
             column: 1,
-            configuration: ['data' => 'nutriscore']
+            configuration: ['barcode' => '123456']
         );
 
-        $this->assertInstanceOf(Widget::class, $widget);
+        $dashboard->addWidget($widget);
+
         $this->assertCount(1, $dashboard->getWidgets());
     }
 
-    public function testCannotAddTwoWidgetsAtSamePosition(): void
+    public function testCannotAddWidgetAtOccupiedPosition(): void
     {
         $this->expectException(WidgetPositionAlreadyOccupiedException::class);
 
-        $dashboard = Dashboard::create(Uuid::v4());
+        $dashboard = new Dashboard(Uuid::v4(), Uuid::v4());
+        
+        $widget1 = new Widget(
+            id: Uuid::v4(),
+            dashboard: $dashboard,
+            type: WidgetType::PRODUCT_SEARCH,
+            row: 1,
+            column: 1,
+            configuration: []
+        );
 
-        $dashboard->addWidget(WidgetType::PIE_CHART, 1, 1, []);
-        $dashboard->addWidget(WidgetType::BAR_CHART, 1, 1, []);
+        $widget2 = new Widget(
+            id: Uuid::v4(),
+            dashboard: $dashboard,
+            type: WidgetType::NUTRISCORE_COMPARISON,
+            row: 1,
+            column: 1,
+            configuration: []
+        );
+
+        $dashboard->addWidget($widget1);
+        $dashboard->addWidget($widget2);
     }
 
-    public function testColumnMustBe1Or2(): void
+    public function testRemoveWidget(): void
     {
-        $this->expectException(InvalidWidgetPositionException::class);
-        $this->expectExceptionMessage('Column must be 1 or 2');
+        $dashboard = new Dashboard(Uuid::v4(), Uuid::v4());
+        
+        $widget = new Widget(
+            id: Uuid::v4(),
+            dashboard: $dashboard,
+            type: WidgetType::PRODUCT_SEARCH,
+            row: 1,
+            column: 1,
+            configuration: []
+        );
 
-        $dashboard = Dashboard::create(Uuid::v4());
-        $dashboard->addWidget(WidgetType::PIE_CHART, 1, 3, []);
-    }
-
-    public function testRowMustBeAtLeast1(): void
-    {
-        $this->expectException(InvalidWidgetPositionException::class);
-        $this->expectExceptionMessage('Row must be at least 1');
-
-        $dashboard = Dashboard::create(Uuid::v4());
-        $dashboard->addWidget(WidgetType::PIE_CHART, 0, 1, []);
-    }
-
-    public function testWidgetCanBeRemoved(): void
-    {
-        $dashboard = Dashboard::create(Uuid::v4());
-
-        $widget = $dashboard->addWidget(WidgetType::PIE_CHART, 1, 1, []);
+        $dashboard->addWidget($widget);
         $this->assertCount(1, $dashboard->getWidgets());
 
         $dashboard->removeWidget($widget->getId());
         $this->assertCount(0, $dashboard->getWidgets());
     }
 
-    public function testWidgetCanBeMoved(): void
+    public function testRemoveNonExistentWidgetThrowsException(): void
     {
-        $dashboard = Dashboard::create(Uuid::v4());
+        $this->expectException(WidgetNotFoundException::class);
 
-        $widget = $dashboard->addWidget(WidgetType::PIE_CHART, 1, 1, []);
+        $dashboard = new Dashboard(Uuid::v4(), Uuid::v4());
+        $dashboard->removeWidget(Uuid::v4());
+    }
+
+    public function testMoveWidget(): void
+    {
+        $dashboard = new Dashboard(Uuid::v4(), Uuid::v4());
         
+        $widget = new Widget(
+            id: Uuid::v4(),
+            dashboard: $dashboard,
+            type: WidgetType::PRODUCT_SEARCH,
+            row: 1,
+            column: 1,
+            configuration: []
+        );
+
+        $dashboard->addWidget($widget);
         $dashboard->moveWidget($widget->getId(), 2, 2);
 
-        $movedWidget = $dashboard->getWidgets()[0];
-        $this->assertEquals(2, $movedWidget->getRow());
-        $this->assertEquals(2, $movedWidget->getColumn());
+        $widgets = $dashboard->getWidgets();
+        $this->assertEquals(2, $widgets[0]->getRow());
+        $this->assertEquals(2, $widgets[0]->getColumn());
     }
 
     public function testCannotMoveWidgetToOccupiedPosition(): void
     {
         $this->expectException(WidgetPositionAlreadyOccupiedException::class);
 
-        $dashboard = Dashboard::create(Uuid::v4());
+        $dashboard = new Dashboard(Uuid::v4(), Uuid::v4());
+        
+        $widget1 = new Widget(
+            id: Uuid::v4(),
+            dashboard: $dashboard,
+            type: WidgetType::PRODUCT_SEARCH,
+            row: 1,
+            column: 1,
+            configuration: []
+        );
 
-        $widget1 = $dashboard->addWidget(WidgetType::PIE_CHART, 1, 1, []);
-        $dashboard->addWidget(WidgetType::BAR_CHART, 2, 2, []);
+        $widget2 = new Widget(
+            id: Uuid::v4(),
+            dashboard: $dashboard,
+            type: WidgetType::NUTRISCORE_COMPARISON,
+            row: 2,
+            column: 2,
+            configuration: []
+        );
 
-        // Essayer de déplacer widget1 vers la position de widget2
+        $dashboard->addWidget($widget1);
+        $dashboard->addWidget($widget2);
+
         $dashboard->moveWidget($widget1->getId(), 2, 2);
-    }
-
-    public function testMultipleWidgetsInDifferentPositions(): void
-    {
-        $dashboard = Dashboard::create(Uuid::v4());
-
-        $dashboard->addWidget(WidgetType::PIE_CHART, 1, 1, []);
-        $dashboard->addWidget(WidgetType::BAR_CHART, 1, 2, []);
-        $dashboard->addWidget(WidgetType::LINE_CHART, 2, 1, []);
-        $dashboard->addWidget(WidgetType::RADAR_CHART, 2, 2, []);
-
-        $this->assertCount(4, $dashboard->getWidgets());
     }
 }
