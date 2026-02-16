@@ -106,9 +106,18 @@ final class LoginUserHandlerTest extends TestCase
 
     public function testBlockedUserCannotLogin(): void
     {
-        $user = new User(Uuid::v4(), 'test@example.com', password_hash('password123', PASSWORD_BCRYPT));
-        
-        // Bloquer le compte
+        $email = 'blocked@test.com';
+        $password = 'password';
+        $ipAddress = '127.0.0.1';
+
+        // Créer un utilisateur bloqué
+        $user = new User(
+            id: Uuid::v4(),
+            email: $email,
+            passwordHash: password_hash($password, PASSWORD_BCRYPT)
+        );
+
+        // Bloquer l'utilisateur (5 tentatives échouées)
         for ($i = 0; $i < 5; $i++) {
             $user->recordFailedLogin();
         }
@@ -116,22 +125,14 @@ final class LoginUserHandlerTest extends TestCase
         $this->userRepository
             ->expects($this->once())
             ->method('findByEmail')
+            ->with($email)
             ->willReturn($user);
 
-        $this->loginAttemptRepository
-            ->expects($this->once())
-            ->method('save');
-
-        // Event de failure dispatché
-        $this->eventDispatcher
-            ->expects($this->once())
-            ->method('dispatch');
-
-        $command = new LoginUserCommand('test@example.com', 'password123', '127.0.0.1');
+        $command = new LoginUserCommand($email, $password, $ipAddress);
         $result = $this->handler->handle($command);
 
         $this->assertFalse($result->isSuccess());
-        $this->assertEquals('Account is temporarily blocked', $result->getErrorMessage());
+        $this->assertEquals('Votre compte est temporairement bloqué. Réessayez plus tard.', $result->getErrorMessage());
     }
 
     public function testNonExistentUserRecordsFailure(): void

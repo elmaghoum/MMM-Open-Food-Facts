@@ -450,7 +450,7 @@ function initProductSearch(container, widgetType, existingConfig) {
                 .catch(function(err) {
                     if (currentSearchRequest === thisRequest) {
                         console.error('Search error:', err);
-                        resultsDiv.innerHTML = '<p class="text-sm text-destructive p-2">❌ Erreur de recherche</p>';
+                        resultsDiv.innerHTML = '<p class="text-sm text-destructive p-2">L\'API d\'Open Food Facts a rencontré une erreur. Veuillez recharger la page ou réessayer plus tard</p>';
                     }
                 });
         }, 500);
@@ -1147,9 +1147,21 @@ function renderShoppingList(products, container) {
         <div class="space-y-3">
             <div class="flex items-center justify-between pb-2 border-b">
                 <h4 class="font-semibold text-sm">Ma liste (${products.length}/20)</h4>
-                <button class="clear-list-btn text-xs text-destructive hover:underline">
-                    Vider la liste
-                </button>
+                <div class="flex gap-2">
+                    <a href="/dashboard/shopping-list/download" 
+                       class="inline-flex items-center justify-center rounded-md text-xs bg-green-600 text-white hover:bg-green-700 h-8 px-3"
+                       title="Télécharger en PDF">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                            <polyline points="7 10 12 15 17 10"/>
+                            <line x1="12" x2="12" y1="15" y2="3"/>
+                        </svg>
+                        PDF
+                    </a>
+                    <button class="clear-list-btn text-xs text-destructive hover:underline">
+                        Vider
+                    </button>
+                </div>
             </div>
             <div class="space-y-2 max-h-[220px] overflow-y-auto">
                 ${products.map(function(p) {

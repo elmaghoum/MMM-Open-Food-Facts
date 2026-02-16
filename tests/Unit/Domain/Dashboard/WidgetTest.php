@@ -14,56 +14,57 @@ final class WidgetTest extends TestCase
 {
     public function testWidgetCanBeCreated(): void
     {
-        $dashboard = Dashboard::create(Uuid::v4());
+        $dashboard = new Dashboard(Uuid::v4(), Uuid::v4());
         
         $widget = new Widget(
             id: Uuid::v4(),
             dashboard: $dashboard,
-            type: WidgetType::PIE_CHART,
+            type: WidgetType::QUICK_BARCODE_SEARCH, 
             row: 1,
             column: 1,
-            configuration: ['data' => 'nutriscore']
+            configuration: ['barcode' => '123456']
         );
 
         $this->assertInstanceOf(Widget::class, $widget);
+        $this->assertEquals(WidgetType::QUICK_BARCODE_SEARCH, $widget->getType());
         $this->assertEquals(1, $widget->getRow());
         $this->assertEquals(1, $widget->getColumn());
-        $this->assertEquals($dashboard->getId(), $widget->getDashboardId());
+        $this->assertEquals(['barcode' => '123456'], $widget->getConfiguration());
     }
 
     public function testWidgetCanBeMovedToNewPosition(): void
     {
-        $dashboard = Dashboard::create(Uuid::v4());
+        $dashboard = new Dashboard(Uuid::v4(), Uuid::v4());
         
         $widget = new Widget(
             id: Uuid::v4(),
             dashboard: $dashboard,
-            type: WidgetType::PIE_CHART,
+            type: WidgetType::NUTRITION_PIE, 
             row: 1,
             column: 1,
             configuration: []
         );
 
-        $widget->moveTo(3, 2);
+        $widget->moveTo(2, 2);
 
-        $this->assertEquals(3, $widget->getRow());
+        $this->assertEquals(2, $widget->getRow());
         $this->assertEquals(2, $widget->getColumn());
     }
 
     public function testWidgetConfigurationCanBeUpdated(): void
     {
-        $dashboard = Dashboard::create(Uuid::v4());
+        $dashboard = new Dashboard(Uuid::v4(), Uuid::v4());
         
         $widget = new Widget(
             id: Uuid::v4(),
             dashboard: $dashboard,
-            type: WidgetType::PIE_CHART,
+            type: WidgetType::SHOPPING_LIST, 
             row: 1,
             column: 1,
-            configuration: ['data' => 'nutriscore']
+            configuration: ['barcodes' => []]
         );
 
-        $newConfig = ['data' => 'nova', 'limit' => 10];
+        $newConfig = ['barcodes' => ['123456', '789012']];
         $widget->updateConfiguration($newConfig);
 
         $this->assertEquals($newConfig, $widget->getConfiguration());

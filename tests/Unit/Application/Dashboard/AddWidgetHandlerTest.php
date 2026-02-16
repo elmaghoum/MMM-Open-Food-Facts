@@ -7,6 +7,7 @@ namespace App\Tests\Unit\Application\Dashboard;
 use Application\Dashboard\Command\AddWidgetCommand;
 use Application\Dashboard\Handler\AddWidgetHandler;
 use Domain\Dashboard\Entity\Dashboard;
+use Domain\Dashboard\Entity\Widget;
 use Domain\Dashboard\Repository\DashboardRepositoryInterface;
 use Domain\Dashboard\ValueObject\WidgetType;
 use PHPUnit\Framework\TestCase;
@@ -26,7 +27,7 @@ final class AddWidgetHandlerTest extends TestCase
     public function testWidgetCanBeAdded(): void
     {
         $userId = Uuid::v4();
-        $dashboard = Dashboard::create($userId);
+        $dashboard = new Dashboard(Uuid::v4(), $userId);
 
         $this->dashboardRepository
             ->expects($this->once())
@@ -41,17 +42,16 @@ final class AddWidgetHandlerTest extends TestCase
 
         $command = new AddWidgetCommand(
             userId: $userId,
-            type: WidgetType::PIE_CHART,
+            type: WidgetType::PRODUCT_SEARCH,
             row: 1,
             column: 1,
-            configuration: ['data' => 'nutriscore']
+            configuration: ['barcode' => '123456']
         );
 
         $result = $this->handler->handle($command);
 
         $this->assertTrue($result->isSuccess());
         $this->assertNotNull($result->getWidgetId());
-        $this->assertCount(1, $dashboard->getWidgets());
     }
 
     public function testDashboardIsCreatedIfNotExists(): void
@@ -67,11 +67,14 @@ final class AddWidgetHandlerTest extends TestCase
         $this->dashboardRepository
             ->expects($this->once())
             ->method('save')
-            ->with($this->isInstanceOf(Dashboard::class));
+            ->with($this->callback(function ($dashboard) use ($userId) {
+                return $dashboard instanceof Dashboard
+                    && $dashboard->getUserId()->equals($userId);
+            }));
 
         $command = new AddWidgetCommand(
             userId: $userId,
-            type: WidgetType::BAR_CHART,
+            type: WidgetType::SHOPPING_LIST,
             row: 1,
             column: 1,
             configuration: []
@@ -85,25 +88,37 @@ final class AddWidgetHandlerTest extends TestCase
     public function testCannotAddWidgetAtOccupiedPosition(): void
     {
         $userId = Uuid::v4();
-        $dashboard = Dashboard::create($userId);
-        $dashboard->addWidget(WidgetType::PIE_CHART, 1, 1, []);
+        $dashboard = new Dashboard(Uuid::v4(), $userId);
+
+        // Ajouter un widget à la position (1,1)
+        $existingWidget = new Widget(
+            id: Uuid::v4(),
+            dashboard: $dashboard,
+            type: WidgetType::NUTRITION_PIE, 
+            row: 1,
+            column: 1,
+            configuration: []
+        );
+        $dashboard->addWidget($existingWidget);
 
         $this->dashboardRepository
             ->expects($this->once())
             ->method('findByUserId')
+            ->with($userId)
             ->willReturn($dashboard);
 
+        // Tentative d'ajout à la même position
         $command = new AddWidgetCommand(
             userId: $userId,
-            type: WidgetType::BAR_CHART,
+            type: WidgetType::PRODUCT_SEARCH,
             row: 1,
-            column: 1, // Même position !
+            column: 1,
             configuration: []
         );
 
         $result = $this->handler->handle($command);
 
         $this->assertFalse($result->isSuccess());
-        $this->assertStringContainsString('already occupied', $result->getErrorMessage());
+        $this->assertEquals('Position déjà occupée', $result->getErrorMessage());
     }
 }

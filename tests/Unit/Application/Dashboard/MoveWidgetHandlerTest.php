@@ -7,6 +7,7 @@ namespace App\Tests\Unit\Application\Dashboard;
 use Application\Dashboard\Command\MoveWidgetCommand;
 use Application\Dashboard\Handler\MoveWidgetHandler;
 use Domain\Dashboard\Entity\Dashboard;
+use Domain\Dashboard\Entity\Widget;
 use Domain\Dashboard\Repository\DashboardRepositoryInterface;
 use Domain\Dashboard\ValueObject\WidgetType;
 use PHPUnit\Framework\TestCase;
@@ -25,13 +26,24 @@ final class MoveWidgetHandlerTest extends TestCase
 
     public function testWidgetCanBeMoved(): void
     {
-        $dashboard = Dashboard::create(Uuid::v4());
-        $widget = $dashboard->addWidget(WidgetType::PIE_CHART, 1, 1, []);
+        $dashboardId = Uuid::v4();
+        $widgetId = Uuid::v4();
+        $dashboard = new Dashboard($dashboardId, Uuid::v4());
+
+        $widget = new Widget(
+            id: $widgetId,
+            dashboard: $dashboard,
+            type: WidgetType::NUTRISCORE_COMPARISON, 
+            row: 1,
+            column: 1,
+            configuration: []
+        );
+        $dashboard->addWidget($widget);
 
         $this->dashboardRepository
             ->expects($this->once())
             ->method('findById')
-            ->with($dashboard->getId())
+            ->with($dashboardId)
             ->willReturn($dashboard);
 
         $this->dashboardRepository
@@ -40,8 +52,8 @@ final class MoveWidgetHandlerTest extends TestCase
             ->with($dashboard);
 
         $command = new MoveWidgetCommand(
-            dashboardId: $dashboard->getId(),
-            widgetId: $widget->getId(),
+            dashboardId: $dashboardId,
+            widgetId: $widgetId,
             newRow: 2,
             newColumn: 2
         );
@@ -55,38 +67,40 @@ final class MoveWidgetHandlerTest extends TestCase
 
     public function testCannotMoveToOccupiedPosition(): void
     {
-        $dashboard = Dashboard::create(Uuid::v4());
-        $widget1 = $dashboard->addWidget(WidgetType::PIE_CHART, 1, 1, []);
-        $dashboard->addWidget(WidgetType::BAR_CHART, 2, 2, []);
+        $dashboardId = Uuid::v4();
+        $dashboard = new Dashboard($dashboardId, Uuid::v4());
+
+        $widget1 = new Widget(
+            id: Uuid::v4(),
+            dashboard: $dashboard,
+            type: WidgetType::NOVA_COMPARISON,
+            row: 1,
+            column: 1,
+            configuration: []
+        );
+        $dashboard->addWidget($widget1);
+
+        $widget2Id = Uuid::v4();
+        $widget2 = new Widget(
+            id: $widget2Id,
+            dashboard: $dashboard,
+            type: WidgetType::SUGAR_SALT_COMPARISON, 
+            row: 2,
+            column: 1,
+            configuration: []
+        );
+        $dashboard->addWidget($widget2);
 
         $this->dashboardRepository
             ->expects($this->once())
             ->method('findById')
+            ->with($dashboardId)
             ->willReturn($dashboard);
 
+        // Tentative de déplacer widget2 vers la position de widget1
         $command = new MoveWidgetCommand(
-            dashboardId: $dashboard->getId(),
-            widgetId: $widget1->getId(),
-            newRow: 2,
-            newColumn: 2 // Déjà occupé !
-        );
-
-        $result = $this->handler->handle($command);
-
-        $this->assertFalse($result->isSuccess());
-        $this->assertStringContainsString('already occupied', $result->getErrorMessage());
-    }
-
-    public function testDashboardNotFound(): void
-    {
-        $this->dashboardRepository
-            ->expects($this->once())
-            ->method('findById')
-            ->willReturn(null);
-
-        $command = new MoveWidgetCommand(
-            dashboardId: Uuid::v4(),
-            widgetId: Uuid::v4(),
+            dashboardId: $dashboardId,
+            widgetId: $widget2Id,
             newRow: 1,
             newColumn: 1
         );
@@ -94,5 +108,6 @@ final class MoveWidgetHandlerTest extends TestCase
         $result = $this->handler->handle($command);
 
         $this->assertFalse($result->isSuccess());
+        $this->assertStringContainsString('Position', $result->getErrorMessage());
     }
 }

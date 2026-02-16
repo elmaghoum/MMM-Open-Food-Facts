@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace UI\Controller;
 
+use Application\Dashboard\Service\ShoppingListPdfGenerator;
 use Application\Dashboard\Command\AddWidgetCommand;
 use Application\Dashboard\Handler\AddWidgetHandler;
 use Application\Dashboard\Handler\MoveWidgetHandler;
@@ -30,6 +31,7 @@ final class DashboardController extends AbstractController
         private readonly MoveWidgetHandler $moveWidgetHandler,
         private readonly WidgetDataProvider $widgetDataProvider,
         private readonly OpenFoodFactsService $openFoodFactsService,
+        private readonly ShoppingListPdfGenerator $pdfGenerator,
     ) {
     }
 
@@ -389,6 +391,62 @@ final class DashboardController extends AbstractController
             'success' => true,
             'message' => 'Liste de course vidée.',
             'count' => 0
+        ]);
+    }
+    #[Route('/dashboard/shopping-list/download', name: 'dashboard_shopping_list_download', methods: ['GET'])]
+    public function downloadShoppingList(): Response
+    {
+        /** @var UserAdapter $user */
+        $user = $this->getUser();
+        
+        $dashboard = $this->dashboardRepository->findByUserId($user->getId());
+
+        if (!$dashboard) {
+            throw $this->createNotFoundException('Dashboard not found');
+        }
+
+        // Trouver le widget shopping_list
+        $shoppingListWidget = null;
+        foreach ($dashboard->getWidgets() as $widget) {
+            if ($widget->getType() === WidgetType::SHOPPING_LIST) {
+                $shoppingListWidget = $widget;
+                break;
+            }
+        }
+
+        if (!$shoppingListWidget) {
+            $this->addFlash('error', 'Vous n\'avez pas de liste de course.');
+            return $this->redirectToRoute('dashboard');
+        }
+
+        $config = $shoppingListWidget->getConfiguration();
+        $barcodes = $config['barcodes'] ?? [];
+
+        if (empty($barcodes)) {
+            $this->addFlash('error', 'Votre liste de course est vide.');
+            return $this->redirectToRoute('dashboard');
+        }
+
+        // Récupérer les produits
+        $products = [];
+        foreach ($barcodes as $barcode) {
+            $productData = $this->openFoodFactsService->getProductByBarcode($barcode);
+            if ($productData) {
+                $products[] = [
+                    'name' => $productData['product_name'] ?? 'Produit inconnu',
+                    'brands' => $productData['brands'] ?? '',
+                    'nutriscore' => strtoupper($productData['nutriscore_grade'] ?? 'N/A'),
+                    'quantity' => $productData['quantity'] ?? '',
+                ];
+            }
+        }
+
+        // Générer le PDF
+        $pdfContent = $this->pdfGenerator->generate($products);
+
+        return new Response($pdfContent, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="liste-de-course-' . date('Y-m-d') . '.pdf"',
         ]);
     }
 }
