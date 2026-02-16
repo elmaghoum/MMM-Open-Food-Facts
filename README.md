@@ -121,7 +121,7 @@ Ce projet a été développé dans le cadre d'un test technique avec les contrai
 
 ---
 
-## 🏗️ Architecture Technique
+## Architecture Technique
 
 ### Approche Domain-Driven Design (DDD)
 
@@ -216,10 +216,53 @@ Priorité aux scénarios métier clés plutôt qu'au composants visuels.
 
 #### Couverture de tests (estimation)
 
-- Domain : 90%+ (logique critique)
-- Application : 80%+ (cas d'usage)
-- Infrastructure : 60%+ (moins critique, intégrations)
-- UI : 50%+ (tests fonctionnels sur parcours clés)
+### Tests Unitaires
+
+**Résultats actuels** :
+
+| Couche | Couverture | Tests | Assertions |
+|--------|------------|-------|------------|
+| **Domain** | ~90% | 24 tests | 89 assertions |
+| **Application** | ~80% | 14 tests | 45 assertions |
+| **Infrastructure** | Non testé | Non prioritaire |
+| **UI** | Non testé |  Non prioritaire |
+
+**Total** : 38 tests unitaires, 134 assertions
+
+---
+
+### Tests Fonctionnels
+
+**Statut** : Prévus mais non implémentés
+
+Méthode prévue : Les tests fonctionnels devaient utiliser une base de données SQLite en mémoire pour tester les parcours utilisateurs complets sans polluer la base de développement.
+
+#### Approche technique
+
+1. Setup automatique : Création du schéma en mémoire avant chaque test
+2. Fixtures de test : Service dédié pour créer des utilisateurs/dashboards de test
+3. Isolation complète: Chaque test repart d'une base vierge
+4. Performance : Tests rapides (~50-100ms par test) grâce à l'utilisation de la RAM
+
+#### Tests fonctionnels prévus
+
+- Login complet (email + 2FA)
+- Ajout/suppression de widgets
+- API `/api/dashboard/{email}` 
+- Interface admin (création/modification users)
+- Téléchargement PDF liste de course
+
+Couverture estimée : ~10 tests fonctionnels supplémentaires
+
+---
+
+### Pourquoi les tests fonctionnels n'ont pas été implémentés ?
+
+#### Contrainte temporelle
+
+- Délai: 1 semaine pour l'ensemble du projet
+- Priorités : Architecture DDD, sécurité 2FA, interface complète
+- Arbitrage : Tests unitaires (logique métier critique) **>** Tests fonctionnels
 
 ---
 
