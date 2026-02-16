@@ -1,0 +1,49 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Cache & temporary files
+/var/cache/*
+/var/log/*
+/var/sessions/*
+!/var/cache/.gitkeep
+!/var/log/.gitkeep
+!/var/sessions/.gitkeep
+
+# Dependencies (will be installed in Docker)
+/vendor/
+/node_modules/
+
+# Built assets (will be built in Docker)
+/public/build/
+
+# Environment files
+.env.local
+.env.*.local
+.env.test
+.env.prod
+
+# Tests
+/phpunit.result.cache
+/.phpunit.cache
+
+# Documentation
+/docs/
+README.md
+
+# Docker
+docker-compose.override.yml

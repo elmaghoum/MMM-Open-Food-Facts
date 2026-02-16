@@ -1,0 +1,64 @@
+{
+    frankenphp
+    
+    order mercure after encode
+    order php_server before file_server
+    
+    servers {
+        metrics
+    }
+}
+
+:80 {
+    root * /app/public
+    
+    encode gzip
+    
+    route {
+        mercure {
+            publish_origins http://localhost:8000
+            transport_url local://local
+            publisher_jwt {env.MERCURE_PUBLISHER_JWT_KEY} {env.MERCURE_PUBLISHER_JWT_ALG}
+            subscriber_jwt {env.MERCURE_SUBSCRIBER_JWT_KEY} {env.MERCURE_SUBSCRIBER_JWT_ALG}
+        }
+        
+        php_server {
+            worker /app/public/index.php
+        }
+    }
+    
+    file_server
+    
+    log {
+        output stdout
+        format console
+    }
+}
+
+:443 {
+    root * /app/public
+    
+    encode gzip
+    
+    route {
+        mercure {
+            publish_origins https://localhost:8443 http://localhost:8000
+            transport_url local://local
+            publisher_jwt {env.MERCURE_PUBLISHER_JWT_KEY} {env.MERCURE_PUBLISHER_JWT_ALG}
+            subscriber_jwt {env.MERCURE_SUBSCRIBER_JWT_KEY} {env.MERCURE_SUBSCRIBER_JWT_ALG}
+        }
+        
+        php_server {
+            worker /app/public/index.php
+        }
+    }
+    
+    file_server
+    
+    tls internal
+    
+    log {
+        output stdout
+        format console
+    }
+}
