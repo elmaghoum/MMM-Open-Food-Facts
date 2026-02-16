@@ -8,16 +8,17 @@ Une application web permettant aux utilisateurs de comparer, analyser et compose
 
 ## Table des matières
 
-- [Contexte et Objectifs](#-contexte-et-objectifs)
-- [Contraintes du Projet](#-contraintes-du-projet)
-- [Fonctionnalités Principales](#-fonctionnalités-principales)
-- [Architecture Technique](#-architecture-technique)
-- [Sécurité](#-sécurité)
-- [Installation et Démarrage](#-installation-et-démarrage)
-- [Tests](#-tests)
-- [API Publique](#-api-publique)
-- [Choix Techniques](#-choix-techniques)
-- [Structure du Projet](#-structure-du-projet)
+1. Contexte et Objectifs  
+2. Contraintes du Projet  
+3. Fonctionnalités Principales  
+4. Architecture Technique  
+5. Sécurité  
+6. Installation et Démarrage  
+7. Tests  
+8. API Publique  
+9. Choix Techniques  
+10. Structure du Projet
+
 
 ---
 
@@ -478,93 +479,7 @@ tests/
 ---
 
 ## API Publique
-
-### Endpoint : Récupérer un dashboard
-
-URL : `GET /api/dashboard/{email}`
-
-Description : Récupère la configuration complète du dashboard d'un utilisateur (informations utilisateur + widgets configurés).
-
-Cas d'usage : Intégration dans une application tierce (app mobile, widget externe, etc.).
-
----
-
-### Requête
-```http
-GET /api/dashboard/admin@mmm.com HTTP/1.1
-Host: localhost:8000
-Accept: application/json
-```
-
----
-
-### Exemple de Réponse (Succès - 200 OK)
-```json
-{
-  "success": true,
-  "user": {
-    "id": "018d1234-5678-9abc-def0-123456789abc",
-    "email": "admin@mmm.com",
-    "roles": ["ROLE_USER"],
-    "is_active": true,
-    "is_admin": true,
-    "created_at": "2025-02-17T12:34:56+00:00"
-  },
-  "dashboard": {
-    "id": "018d1234-5678-9abc-def0-987654321abc",
-    "widgets_count": 3,
-    "widgets": [
-      {
-        "id": "018d1234-aaaa-bbbb-cccc-111111111111",
-        "type": "shopping_list",
-        "row": 1,
-        "column": 1,
-        "configuration": {
-          "barcodes": ["3017620422003", "3017620425003"]
-        }
-      },
-      {
-        "id": "018d1234-aaaa-bbbb-cccc-222222222222",
-        "type": "nutriscore_comparison",
-        "row": 1,
-        "column": 2,
-        "configuration": {
-          "barcodes": ["3017620422003", "3017620425003", "3017620429001"]
-        }
-      },
-      {
-        "id": "018d1234-aaaa-bbbb-cccc-333333333333",
-        "type": "product_search",
-        "row": 2,
-        "column": 1,
-        "configuration": {
-          "barcode": "3017620422003"
-        }
-      }
-    ]
-  }
-}
-```
-
----
-
-### Réponse (Utilisateur non trouvé - 404)
-```json
-{
-  "error": "User not found",
-  "email": "nonexistent@mmm.com"
-}
-```
-
----
-
-### Réponse (Dashboard non trouvé - 404)
-```json
-{
-  "error": "Dashboard not found",
-  "email": "user@mmm.com"
-}
-```
+La documentation de l'API exposé est contenue dans le fichier **Documentation_API.md** dans ce même depôt.
 
 ---
 
