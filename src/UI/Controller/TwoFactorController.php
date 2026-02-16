@@ -13,7 +13,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
+use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use UI\Form\TwoFactorType;
 
 final class TwoFactorController extends AbstractController
@@ -57,7 +57,7 @@ final class TwoFactorController extends AbstractController
                     $userAdapter = UserAdapter::fromDomainUser($domainUser);
                     
                     // Créer la session Symfony Security manuellement
-                    $token = new \Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken(
+                    $token = new UsernamePasswordToken(
                         $userAdapter,
                         'main',
                         $userAdapter->getRoles()
@@ -72,9 +72,16 @@ final class TwoFactorController extends AbstractController
                     $this->twoFactorStorage->clear();
 
                     $this->addFlash('success', 'Connexion réussie !');
+
+                    // Rediriger selon le rôle
+                    if ($domainUser->isAdmin()) {
+                        return $this->redirectToRoute('admin_dashboard');
+                    }
+
                     return $this->redirectToRoute('dashboard');
                 }
             }
+
             $this->addFlash('error', 'Code incorrect ou expiré.');
         }
 

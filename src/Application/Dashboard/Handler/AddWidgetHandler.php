@@ -9,6 +9,7 @@ use Application\Dashboard\DTO\AddWidgetResult;
 use Domain\Dashboard\Entity\Dashboard;
 use Domain\Dashboard\Entity\Widget;
 use Domain\Dashboard\Repository\DashboardRepositoryInterface;
+use Domain\Dashboard\ValueObject\WidgetType;
 use Symfony\Component\Uid\Uuid;
 
 final readonly class AddWidgetHandler
@@ -27,6 +28,14 @@ final readonly class AddWidgetHandler
         }
 
         try {
+            if ($command->type === WidgetType::SHOPPING_LIST) {
+                foreach ($dashboard->getWidgets() as $existingWidget) {
+                    if ($existingWidget->getType() === WidgetType::SHOPPING_LIST) {
+                        return AddWidgetResult::failure('Vous avez déjà une liste de course. Vous ne pouvez en avoir qu\'une seule.');
+                    }
+                }
+            }
+
             // Vérifier si la position est déjà occupée
             foreach ($dashboard->getWidgets() as $existingWidget) {
                 if ($existingWidget->getRow() === $command->row && 

@@ -24,8 +24,11 @@ final class LoginController extends AbstractController
     #[Route('/login', name: 'login')]
     public function login(Request $request): Response
     {
-        // Si déjà connecté, rediriger
+        // Si déjà connecté, rediriger selon le rôle
         if ($this->getUser()) {
+            if (in_array('ROLE_ADMIN', $this->getUser()->getRoles(), true)) {
+                return $this->redirectToRoute('admin_dashboard');
+            }
             return $this->redirectToRoute('dashboard');
         }
 
@@ -46,12 +49,11 @@ final class LoginController extends AbstractController
             if ($result->isSuccess()) {
                 // Stocker l'ID utilisateur en session pour la 2FA
                 $this->twoFactorStorage->store($result->getUserId());
-
                 $this->addFlash('success', 'Code de vérification envoyé par email !');
                 return $this->redirectToRoute('two_factor');
             }
 
-            $this->addFlash('error', 'Erreur : ' . $result->getErrorMessage());
+            $this->addFlash('error', $result->getErrorMessage());
         }
 
         return $this->render('login/index.html.twig', [

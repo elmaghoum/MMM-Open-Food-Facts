@@ -80,7 +80,7 @@ final readonly class TwoFactorMailer
                 <h1>Votre code 2FA  -  Mieux Manger en Marne</h1>
                 <p>Utilisez ce code pour finaliser votre connexion :</p>
                 <div class="code">{$code}</div>
-                <p class="info">Ce code expirera à {$expiresAt}</p>
+                <p class="info">Ce code expirera dans 10 minutes.</p>
                 <p class="info">Si vous n'avez pas demandé ce code, veuillez ignorer cet email.</p>
             </div>
         </body>

@@ -25,6 +25,12 @@ class User
     #[ORM\Column(name: 'password_hash', type: 'string', length: 255)]
     private string $passwordHash;
 
+    #[ORM\Column(type: 'json')]
+    private array $roles = ['ROLE_USER'];
+
+    #[ORM\Column(name: 'is_active', type: 'boolean')]
+    private bool $isActive = true;
+
     #[ORM\Column(name: 'failed_login_attempts', type: 'integer')]
     private int $failedLoginAttempts = 0;
 
@@ -41,10 +47,12 @@ class User
         Uuid $id,
         string $email,
         string $passwordHash,
+        array $roles = ['ROLE_USER'],
     ) {
         $this->id = $id;
         $this->email = $email;
         $this->passwordHash = $passwordHash;
+        $this->roles = array_unique(array_merge(['ROLE_USER'], $roles));
         $this->createdAt = new \DateTimeImmutable();
         $this->updatedAt = new \DateTimeImmutable();
     }
@@ -62,6 +70,38 @@ class User
     public function getPasswordHash(): string
     {
         return $this->passwordHash;
+    }
+
+    public function getRoles(): array
+    {
+        return $this->roles;
+    }
+
+    public function hasRole(string $role): bool
+    {
+        return in_array($role, $this->roles);
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->hasRole('ROLE_ADMIN');
+    }
+
+    public function isActive(): bool
+    {
+        return $this->isActive;
+    }
+
+    public function activate(): void
+    {
+        $this->isActive = true;
+        $this->updatedAt = new \DateTimeImmutable();
+    }
+
+    public function deactivate(): void
+    {
+        $this->isActive = false;
+        $this->updatedAt = new \DateTimeImmutable();
     }
 
     public function getFailedLoginAttempts(): int

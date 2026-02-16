@@ -1,0 +1,277 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Administration - MMM{% endblock %}
+
+{% block body %}
+<div class="container mx-auto px-4 py-8">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Administration</h1>
+        <p class="text-gray-600">Gestion des utilisateurs de la plateforme</p>
+    </div>
+
+    {# Stats #}
+    <div class="grid md:grid-cols-4 gap-6 mb-8">
+        {% embed 'components/ui/card.html.twig' %}
+            {% block content %}
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-600">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                            <circle cx="9" cy="7" r="4"/>
+                            <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-sm text-muted-foreground">Total Utilisateurs</p>
+                        <p class="text-2xl font-bold">{{ totalUsers }}</p>
+                    </div>
+                </div>
+            {% endblock %}
+        {% endembed %}
+
+        {% embed 'components/ui/card.html.twig' %}
+            {% block content %}
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-green-600">
+                            <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/>
+                            <path d="m9 12 2 2 4-4"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-sm text-muted-foreground">Actifs</p>
+                        <p class="text-2xl font-bold">{{ users|filter(u => u.isActive)|length }}</p>
+                    </div>
+                </div>
+            {% endblock %}
+        {% endembed %}
+
+        {% embed 'components/ui/card.html.twig' %}
+            {% block content %}
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-600">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-sm text-muted-foreground">Admins</p>
+                        <p class="text-2xl font-bold">{{ users|filter(u => u.isAdmin)|length }}</p>
+                    </div>
+                </div>
+            {% endblock %}
+        {% endembed %}
+
+        {% embed 'components/ui/card.html.twig' %}
+            {% block content %}
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-red-600">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="m15 9-6 6"/>
+                            <path d="m9 9 6 6"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-sm text-muted-foreground">Inactifs</p>
+                        <p class="text-2xl font-bold">{{ users|filter(u => not u.isActive)|length }}</p>
+                    </div>
+                </div>
+            {% endblock %}
+        {% endembed %}
+    </div>
+
+    {# Bouton Créer utilisateur #}
+    <div class="mb-6">
+        <button onclick="openCreateUserModal()" class="inline-flex items-center justify-center rounded-md text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <line x1="19" x2="19" y1="8" y2="14"/>
+                <line x1="22" x2="16" y1="11" y2="11"/>
+            </svg>
+            Créer un utilisateur
+        </button>
+    </div>
+
+    {# Table utilisateurs #}
+    {% embed 'components/ui/card.html.twig' %}
+        {% block header %}
+            <h3 class="text-lg font-semibold">Liste des utilisateurs</h3>
+        {% endblock %}
+
+        {% block content %}
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="border-b">
+                        <tr class="text-left">
+                            <th class="pb-3 font-semibold text-sm">Email</th>
+                            <th class="pb-3 font-semibold text-sm">Rôle</th>
+                            <th class="pb-3 font-semibold text-sm">Statut</th>
+                            <th class="pb-3 font-semibold text-sm">Créé le</th>
+                            <th class="pb-3 font-semibold text-sm text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                            <tr class="border-b last:border-b-0 hover:bg-muted/50">
+                                <td class="py-4">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-semibold">
+                                            {{ user.email|slice(0, 2)|upper }}
+                                        </div>
+                                        <div>
+                                            <div class="font-medium">{{ user.email }}</div>
+                                            {% if user.email == app.user.userIdentifier %}
+                                                <span class="text-xs text-muted-foreground">(Vous)</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="py-4">
+                                    {% if user.isAdmin %}
+                                        {% include 'components/ui/badge.html.twig' with {label: 'Admin', variant: 'default'} %}
+                                    {% else %}
+                                        {% include 'components/ui/badge.html.twig' with {label: 'Utilisateur', variant: 'secondary'} %}
+                                    {% endif %}
+                                </td>
+                                <td class="py-4">
+                                    {% if user.isActive %}
+                                        <span class="inline-flex items-center gap-1 text-sm text-green-600">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/>
+                                                <path d="m9 12 2 2 4-4"/>
+                                            </svg>
+                                            Actif
+                                        </span>
+                                    {% else %}
+                                        <span class="inline-flex items-center gap-1 text-sm text-red-600">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <circle cx="12" cy="12" r="10"/>
+                                                <path d="m15 9-6 6"/>
+                                                <path d="m9 9 6 6"/>
+                                            </svg>
+                                            Inactif
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td class="py-4 text-sm text-muted-foreground">
+                                    {{ user.createdAt|date('d/m/Y H:i') }}
+                                </td>
+                                <td class="py-4 text-right">
+                                    <div class="flex items-center justify-end gap-2">
+                                        {# Toggle actif/inactif #}
+                                        {% if user.email != app.user.userIdentifier %}
+                                            <form method="post" action="{{ path('admin_user_toggle_active', {id: user.id.toRfc4122}) }}" class="inline">
+                                                <button type="submit" class="inline-flex items-center justify-center rounded-md text-sm font-medium hover:bg-accent hover:text-accent-foreground h-9 w-9" title="{{ user.isActive ? 'Désactiver' : 'Activer' }}">
+                                                    {% if user.isActive %}
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                            <path d="M18 6 6 18"/>
+                                                            <path d="m6 6 12 12"/>
+                                                        </svg>
+                                                    {% else %}
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                            <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/>
+                                                            <path d="m9 12 2 2 4-4"/>
+                                                        </svg>
+                                                    {% endif %}
+                                                </button>
+                                            </form>
+
+                                            {# Supprimer #}
+                                            <button onclick="deleteUser('{{ user.id.toRfc4122 }}', '{{ user.email }}')" class="inline-flex items-center justify-center rounded-md text-sm font-medium hover:bg-destructive hover:text-destructive-foreground h-9 w-9" title="Supprimer">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M3 6h18"/>
+                                                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                                                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                                                </svg>
+                                            </button>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="5" class="py-8 text-center text-muted-foreground">
+                                    Aucun utilisateur
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endblock %}
+    {% endembed %}
+</div>
+
+<script>
+function openCreateUserModal() {
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm';
+    modal.onclick = function(e) {
+        if (e.target === modal) {
+            document.body.removeChild(modal);
+        }
+    };
+    
+    modal.innerHTML = `
+        <div class="bg-background rounded-lg border shadow-lg p-6 max-w-md w-full mx-4" onclick="event.stopPropagation()">
+            <h2 class="text-lg font-semibold mb-4">Créer un utilisateur</h2>
+            
+            <form method="post" action="{{ path('admin_user_create') }}" class="space-y-4">
+                <div class="space-y-2">
+                    <label class="text-sm font-medium">Email</label>
+                    <input type="email" name="email" required class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" placeholder="utilisateur@exemple.com">
+                </div>
+                
+                <div class="space-y-2">
+                    <label class="text-sm font-medium">Mot de passe</label>
+                    <input type="password" name="password" required class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+                </div>
+                
+                <div class="space-y-2">
+                    <label class="text-sm font-medium">Rôle</label>
+                    <select name="role" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+                        <option value="ROLE_USER">Utilisateur</option>
+                        <option value="ROLE_ADMIN">Administrateur</option>
+                    </select>
+                </div>
+                
+                <div class="flex gap-2 mt-6">
+                    <button type="submit" class="inline-flex items-center justify-center rounded-md text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 flex-1">
+                        Créer
+                    </button>
+                    <button type="button" onclick="this.closest('.fixed').remove()" class="inline-flex items-center justify-center rounded-md text-sm font-medium border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 flex-1">
+                        Annuler
+                    </button>
+                </div>
+            </form>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+}
+
+function deleteUser(userId, userEmail) {
+    if (!confirm(`Voulez-vous vraiment supprimer l'utilisateur "${userEmail}" ?`)) {
+        return;
+    }
+    
+    fetch(`/admin/user/${userId}/delete`, {
+        method: 'DELETE'
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            window.location.reload();
+        } else {
+            alert('Erreur : ' + data.error);
+        }
+    })
+    .catch(err => {
+        alert('Erreur : ' + err.message);
+    });
+}
+</script>
+{% endblock %}

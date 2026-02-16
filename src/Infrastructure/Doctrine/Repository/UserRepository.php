@@ -32,4 +32,20 @@ final class UserRepository extends ServiceEntityRepository implements UserReposi
     {
         return $this->findOneBy(['email' => $email]);
     }
+
+    public function findAll(): array
+    {
+        return parent::findAll(); 
+    }
+
+    public function countUsers(): int 
+    {
+        return parent::count([]); 
+    }
+
+    public function delete(User $user): void
+    {
+        $this->getEntityManager()->remove($user);
+        $this->getEntityManager()->flush();
+    }
 }

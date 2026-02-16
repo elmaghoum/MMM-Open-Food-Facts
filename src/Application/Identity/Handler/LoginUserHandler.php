@@ -34,14 +34,21 @@ final readonly class LoginUserHandler
         if (!$user) {
             $this->recordFailedAttempt($command->email, $command->ipAddress, 'User not found');
             $this->dispatchFailureEvent($command->email, $command->ipAddress, 'Invalid credentials');
-            return LoginResult::failure('Invalid credentials');
+            return LoginResult::failure('Cette adresse email n\'existe pas');
+        }
+
+        // ✅ VÉRIFIER SI L'UTILISATEUR EST ACTIF
+        if (!$user->isActive()) {
+            $this->recordFailedAttempt($command->email, $command->ipAddress, 'Account disabled');
+            $this->dispatchFailureEvent($command->email, $command->ipAddress, 'Votre compte a été désactivé. Contactez un administrateur.');
+            return LoginResult::failure('Votre compte a été désactivé. Contactez un administrateur.');
         }
 
         // Vérifier si le compte est bloqué
         if ($user->isBlocked()) {
             $this->recordFailedAttempt($command->email, $command->ipAddress, 'Account blocked');
             $this->dispatchFailureEvent($command->email, $command->ipAddress, 'Account is temporarily blocked');
-            return LoginResult::failure('Account is temporarily blocked');
+            return LoginResult::failure('Votre compte est temporairement bloqué. Réessayez plus tard.');
         }
 
         // Vérifier le mot de passe
@@ -50,13 +57,12 @@ final readonly class LoginUserHandler
             $this->userRepository->save($user);
             $this->recordFailedAttempt($command->email, $command->ipAddress, 'Invalid password');
             $this->dispatchFailureEvent($command->email, $command->ipAddress, 'Invalid credentials');
-            return LoginResult::failure('Invalid credentials');
+            return LoginResult::failure('Mot de passe incorrect');
         }
 
         // Succès : générer le code 2FA
         $twoFactorCode = TwoFactorCode::generate($user->getId());
         $this->twoFactorCodeRepository->save($twoFactorCode);
-
         $this->userRepository->save($user);
         $this->recordSuccessAttempt($command->email, $command->ipAddress);
 

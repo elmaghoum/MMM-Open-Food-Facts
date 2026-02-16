@@ -1,14 +1,15 @@
 import './styles/app.css';
 
+// Auto-dismiss flash messages
 document.addEventListener('DOMContentLoaded', function() {
     const flashAlerts = document.querySelectorAll('.flash-alert[data-dismissible="true"]');
     
     flashAlerts.forEach(function(alert) {
         // Auto-dismiss après 4 secondes
         setTimeout(function() {
-            // Animation de sortie
+            // Animation de sortie vers la droite
             alert.style.opacity = '0';
-            alert.style.transform = 'translateY(-1rem)';
+            alert.style.transform = 'translateX(2rem)';
             alert.style.transition = 'all 0.3s ease-out';
             
             // Supprimer du DOM après l'animation
@@ -30,7 +31,7 @@ window.dismissAlert = function(button) {
     const alert = button.closest('.flash-alert') || button.closest('[role="alert"]').parentElement;
     if (alert) {
         alert.style.opacity = '0';
-        alert.style.transform = 'translateY(-1rem)';
+        alert.style.transform = 'translateX(2rem)';
         alert.style.transition = 'all 0.3s ease-out';
         
         setTimeout(function() {

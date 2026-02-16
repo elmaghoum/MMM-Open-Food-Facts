@@ -121,6 +121,15 @@ function initDragAndDrop() {
 
         console.log('Drop detected:', draggedWidgetType);
 
+        if (draggedWidgetType === 'shopping_list') {
+            const existingShoppingList = document.querySelector('.widget-content[data-widget-type="shopping_list"]');
+            if (existingShoppingList) {
+                showLimitDialog('Vous avez déjà une liste de course. Vous ne pouvez en avoir qu\'une seule.');
+                draggedWidgetType = null;
+                return;
+            }
+        }
+
         const existingWidgets = document.querySelectorAll('.widget-container');
         const positions = new Set();
         
@@ -153,14 +162,19 @@ function initDragAndDrop() {
         openWidgetConfigModal(draggedWidgetType, row, column);
         draggedWidgetType = null;
     });
-}
+    }
 
-function showLimitDialog() {
+function showLimitDialog(customMessage) {
+    const isCustom = !!customMessage;
+    const title = isCustom ? 'Action non autorisée' : '⚠️ Limite atteinte';
+    const message = customMessage || 'Vous avez atteint la limite de <strong>10 widgets</strong> autorisés pour cette version de démonstration.';
+    const extraMessage = isCustom ? '' : '<p>Pour ajouter de nouveaux widgets, veuillez supprimer un widget existant ou passer à la version complète.</p>';
+    
     const modal = createShadcnModal({
-        title: '⚠️ Limite atteinte',
+        title: title,
         description: `
-            <p class="mb-4">Vous avez atteint la limite de <strong>10 widgets</strong> autorisés pour cette version de démonstration.</p>
-            <p>Pour ajouter de nouveaux widgets, veuillez supprimer un widget existant ou passer à la version complète.</p>
+            <p class="mb-4">${message}</p>
+            ${extraMessage}
         `,
         buttons: [
             {
@@ -238,31 +252,36 @@ function createShadcnModal(options) {
 function openWidgetConfigModal(type, row, column, existingConfig = null, widgetId = null) {
     const modalContent = generateConfigModalContent(type, existingConfig);
     
+    const buttons = [];
+    
+    if (!modalContent.hideButton) {
+        buttons.push({
+            label: widgetId ? 'Mettre à jour' : 'Ajouter au dashboard',
+            variant: 'default',
+            class: 'flex-1 save-btn',
+            onClick: function(modalElement) {
+                if (widgetId) {
+                    updateWidget(widgetId, modalElement);
+                } else {
+                    saveWidget(type, row, column, modalElement);
+                }
+            }
+        });
+    }
+    
+    buttons.push({
+        label: 'Annuler',
+        variant: 'outline',
+        class: 'flex-1',
+        onClick: function(modalElement) {
+            document.body.removeChild(modalElement);
+        }
+    });
+    
     const modal = createShadcnModal({
         title: modalContent.title,
         content: modalContent.html,
-        buttons: [
-            {
-                label: widgetId ? 'Mettre à jour' : 'Ajouter au dashboard',
-                variant: 'default',
-                class: 'flex-1 save-btn',
-                onClick: function(modalElement) {
-                    if (widgetId) {
-                        updateWidget(widgetId, modalElement);
-                    } else {
-                        saveWidget(type, row, column, modalElement);
-                    }
-                }
-            },
-            {
-                label: 'Annuler',
-                variant: 'outline',
-                class: 'flex-1',
-                onClick: function(modalElement) {
-                    document.body.removeChild(modalElement);
-                }
-            }
-        ]
+        buttons: buttons
     });
     
     document.body.appendChild(modal);
@@ -276,7 +295,7 @@ function generateConfigModalContent(type, existingConfig) {
     const titles = {
         'product_search': 'Recherche Produit',
         'quick_barcode_search': 'Recherche par Code-barres',
-        'sugar_salt_comparison': 'Comparaison Sucre et Sel',
+        'sugar_salt_comparison': 'Comparaison Sucre & Sel',
         'nutriscore_comparison': 'Comparaison Nutriscore',
         'nova_comparison': 'Comparaison NOVA',
         'nutrition_pie': 'Graphique Nutritionnel',
@@ -284,23 +303,29 @@ function generateConfigModalContent(type, existingConfig) {
     };
 
     if (type === 'shopping_list') {
+        const existingShoppingList = document.querySelector('.widget-content[data-widget-type="shopping_list"]');
+        
         return {
             title: titles[type],
             html: `
-                <div class="rounded-lg border bg-blue-50 p-4">
+                <div class="rounded-lg border ${existingShoppingList ? 'bg-red-50 border-red-200' : 'bg-blue-50 border-blue-200'} p-4">
                     <div class="flex items-start gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-600 flex-shrink-0 mt-0.5">
-                            <circle cx="12" cy="12" r="10"/>
-                            <path d="M12 16v-4"/>
-                            <path d="M12 8h.01"/>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${existingShoppingList ? 'text-red-600' : 'text-blue-600'} flex-shrink-0 mt-0.5">
+                            ${existingShoppingList 
+                                ? '<circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/>'
+                                : '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>'
+                            }
                         </svg>
-                        <p class="text-sm text-blue-800">
-                            📝 Votre liste de course est prête ! Utilisez les boutons <strong class="text-green-600">+</strong> 
-                            sur les autres widgets pour ajouter des produits.
+                        <p class="text-sm ${existingShoppingList ? 'text-red-800' : 'text-blue-800'}">
+                            ${existingShoppingList 
+                                ? '<strong>Vous avez déjà une liste de course.</strong><br>Vous ne pouvez en avoir qu\'une seule.' 
+                                : 'Votre liste de course est prête ! Utilisez les boutons <strong class="text-green-600">+</strong> sur les autres widgets pour ajouter des produits.'
+                            }
                         </p>
                     </div>
                 </div>
-            `
+            `,
+            hideButton: !!existingShoppingList 
         };
     }
 
@@ -371,6 +396,7 @@ function generateConfigModalContent(type, existingConfig) {
         html: html
     };
 }
+
 // ========================
 // RECHERCHE PRODUITS
 // ========================

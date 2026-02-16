@@ -16,6 +16,7 @@ final readonly class UserAdapter implements UserInterface, PasswordAuthenticated
         private string $email,
         private string $passwordHash,
         private array $roles,
+        private bool $isActive,
     ) {
     }
 
@@ -25,7 +26,8 @@ final readonly class UserAdapter implements UserInterface, PasswordAuthenticated
             id: $user->getId(),
             email: $user->getEmail(),
             passwordHash: $user->getPasswordHash(),
-            roles: ['ROLE_USER'],
+            roles: $user->getRoles(),
+            isActive: $user->isActive(),
         );
     }
 
@@ -51,5 +53,15 @@ final readonly class UserAdapter implements UserInterface, PasswordAuthenticated
 
     public function eraseCredentials(): void
     {
+    }
+
+    public function isActive(): bool
+    {
+        return $this->isActive;
+    }
+
+    public function isAdmin(): bool
+    {
+        return in_array('ROLE_ADMIN', $this->roles);
     }
 }
