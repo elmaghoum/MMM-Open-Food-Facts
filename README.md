@@ -460,26 +460,14 @@ docker compose exec app php bin/phpunit --coverage-html var/coverage
 ```
 tests/
 ├── Domain/
-│   ├── Dashboard/
-│   │   └── Entity/
-│   │       ├── DashboardTest.php
-│   │       └── WidgetTest.php
-│   └── Identity/
-│       └── Entity/
-│           └── UserTest.php
-│
-├── Application/
-│   ├── Dashboard/
-│   │   └── Handler/
-│   │       └── AddWidgetHandlerTest.php
-│   └── Identity/
-│       └── Handler/
-│           └── LoginUserHandlerTest.php
-│
-└── UI/
-    └── Controller/
-        ├── LoginControllerTest.php
-        └── DashboardControllerTest.php
+   ├── Dashboard/
+   │   └── Entity/
+   │       ├── DashboardTest.php
+   │       └── WidgetTest.php
+   └── Identity/
+       └── Entity/
+           └── UserTest.php
+
 ```
 
 ---
