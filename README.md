@@ -369,9 +369,9 @@ Pas besoin de PHP, Composer, Node.js ou PostgreSQL en local ! Tout est conteneur
 ```bash
 # 1. Cloner le repository
 git clone https://github.com/elmaghoum/MMM-Open-Food-Facts.git
-cd mmm
+cd MMM-Open-Food-Facts
 
-# 2. Configurer dans son fichier l'adresse mail émettrice pour l'envoie du code 2FA : 
+# 2. Configurer dans son fichier .env l'adresse mail émettrice pour l'envoie du code 2FA : 
 # Dans le .env modifier la variable 'MAILER_DSN' et enregister.
 
 # 3. Démarrer l'application 
