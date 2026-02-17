@@ -371,7 +371,7 @@ Pas besoin de PHP, Composer, Node.js ou PostgreSQL en local ! Tout est conteneur
 git clone https://github.com/elmaghoum/MMM-Open-Food-Facts.git
 cd mmm
 
-# 2. Configurer dans son fichier l'adresse mail emmetrice pour l'envoie du code 2FA : 
+# 2. Configurer dans son fichier l'adresse mail émettrice pour l'envoie du code 2FA : 
 # Dans le .env modifier la variable 'MAILER_DSN' et enregister.
 
 # 3. Démarrer l'application 
@@ -394,7 +394,7 @@ docker compose exec app php bin/console app:create-admin noreply.mieuxmangerenma
 
 ### Accès aux services
 
-| Service | URL | Identifiants |
+| Service | URL | Identifiants (exemple) |
 |---------|-----|--------------|
 | **Application** | http://localhost:8000 | noreply.mieuxmangerenmarne@gmail.com / AdminPassword123! |
 | **PostgreSQL** | localhost:5432 | mmm_user / mmm_password |
@@ -419,6 +419,9 @@ docker compose up -d --build
 
 # Vider le cache Symfony
 docker compose exec app php bin/console cache:clear
+
+# Active le rechargement automatique (hot reload), utilse pour recharger le JS/CSS
+docker compose exec app npm run dev
 
 # Créer un utilisateur normal est possible via l'interface d'administration où par la commande suivante :
 docker compose exec app php bin/console app:create-admin user@mmm.com UserPass123!
