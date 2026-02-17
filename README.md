@@ -1,6 +1,7 @@
 # MMM - Mieux Manger en Marne
 
 MMM - Mieux Manger en Marne est une application web permettant aux utilisateurs de comparer, analyser et composer leur liste de course pour une alimentation plus saine, en s'appuyant sur les données nutritionnelles de plus de 3 millions de produits.
+
 Elle se base sur la création et la personnalisation d'un dashboard interactif de comparaison de produits alimentaires basé sur Open Food Facts.
 
 ---
