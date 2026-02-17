@@ -18,10 +18,10 @@ final readonly class TwoFactorMailer
 
     public function sendCode(string $recipientEmail, TwoFactorCode $twoFactorCode): void
     {
-        // le to doit être dynamique (->to($recipientEmail)) mais pour les tests on peut le laisser en dur sur une adresse de test
+        // le ->to doit être dynamique (->to($recipientEmail)) mais pour les tests on peut le laisser en dur sur une adresse de test
         $email = (new Email())
             ->from($this->fromEmail)
-            ->to('noreply.mieuxmangerenmarne@gmail.com') // remplacer par $recipientEmail // TEST : utilisation d'adresse mail de test
+            ->to($recipientEmail) 
             ->subject('Votre Code de vérification - MMM')
             ->html($this->renderEmailTemplate($twoFactorCode));
 

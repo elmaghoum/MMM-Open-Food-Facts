@@ -37,7 +37,7 @@ final readonly class WidgetDataProvider
         $product = $this->openFoodFactsService->getProductDetails($barcode);
         
         if (!$product) {
-            return ['error' => 'Product not found'];
+            return ['error' => 'Une erreur est survenue lors de la récupération du produit. Rafraîchissez la page.'];
         }
 
         return [
@@ -161,7 +161,7 @@ final readonly class WidgetDataProvider
         $product = $this->openFoodFactsService->getProductDetails($barcode);
         
         if (!$product) {
-            return ['error' => 'Product not found'];
+            return ['error' => 'Une erreur est survenue lors de la récupération du produit. Rafraîchissez la page.'];
         }
 
         $nutriments = $product['nutriments'] ?? [];
@@ -219,7 +219,7 @@ final readonly class WidgetDataProvider
         $product = $this->openFoodFactsService->getProductByBarcode($barcode);
         
         if (!$product) {
-            return ['error' => 'Product not found'];
+            return ['error' => 'Une erreur est survenue lors de la récupération du produit. Rafraîchissez la page.'];
         }
 
         return [

@@ -828,7 +828,7 @@ function loadWidgetData(widgetId, widgetType) {
         })
         .catch(function(err) {
             console.error('Error loading widget:', err);
-            contentDiv.innerHTML = '<div class="flex items-center justify-center h-full"><p class="text-sm text-destructive">Erreur de chargement</p></div>';
+            contentDiv.innerHTML = '<div class="flex items-center justify-center h-full"><p class="text-sm text-destructive">Erreur de chargement, trop de requêtes simultanées. Rafraîchissez la page</p></div>';
         });
 }
 
