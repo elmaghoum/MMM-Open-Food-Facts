@@ -379,10 +379,13 @@ docker compose up -d --build
 
 # 4. Attendre 15-20 secondes (démarrage de postgresql + migrations automatiques)
 
-# 5. Créer le premier administrateur - Changer l'email et le mot de passe par le votre. Exemple :
+# 5. Créer les classes public/build pour (re)charger le JS/CSS
+docker compose exec app npm run dev
+
+# 6. Créer le premier administrateur - Changer l'email et le mot de passe par le votre. Exemple :
 docker compose exec app php bin/console app:create-admin noreply.mieuxmangerenmarne@gmail.com AdminPassword123!
 
-# 6. Ouvrir l'application via un naviagateur
+# 7. Ouvrir l'application via un naviagateur
 # http://localhost:8000
 ```
 
@@ -420,7 +423,7 @@ docker compose up -d --build
 # Vider le cache Symfony
 docker compose exec app php bin/console cache:clear
 
-# Active le rechargement automatique (hot reload), utilse pour recharger le JS/CSS
+# Active le rechargement automatique (hot reload), utile pour recharger le JS/CSS
 docker compose exec app npm run dev
 
 # Créer un utilisateur normal est possible via l'interface d'administration où par la commande suivante :
