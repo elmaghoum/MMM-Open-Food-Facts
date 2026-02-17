@@ -443,14 +443,8 @@ docker compose up -d --build
 
 ### Exécution des tests
 ```bash
-# Tests unitaires (Domain)
-docker compose exec app php bin/phpunit tests/Domain
-
 # Tous les tests
 docker compose exec app php bin/phpunit
-
-# Tests avec couverture
-docker compose exec app php bin/phpunit --coverage-html var/coverage
 ```
 
 ### Structure des tests
@@ -647,6 +641,7 @@ mmm/
 ├── config/                      # Configuration Symfony
 │   ├── packages/
 │   ├── routes/
+│   ├── routes.yaml
 │   └── services.yaml
 │
 ├── docker/                      # Configuration Docker
@@ -677,21 +672,27 @@ mmm/
 │   │       │   ├── TwoFactorCode.php
 │   │       │   └── LoginAttempt.php
 │   │       ├── Repository/
-│   │       │   ├── UserRepositoryInterface.php
+│   │       │   ├── UserRepositoryInterface.php 
+│   │       │   ├── LoginAttemptRepositoryInterface.php
 │   │       │   └── TwoFactorCodeRepositoryInterface.php
 │   │       └── Exception/
+│   │           ├── TwoFactorCodeExpiredException.php 
+│   │           ├── TwoFactorCodeAlreadyUsedException.php
 │   │           └── UserBlockedException.php
 │   │
 │   ├── Application/             # Cas d'usage (orchestration)
 │   │   ├── Dashboard/
 │   │   │   ├── Command/
 │   │   │   │   ├── AddWidgetCommand.php
-│   │   │   │   └── RemoveWidgetCommand.php
+│   │   │   │   └── MoveWidgetCommand.php
 │   │   │   ├── Handler/
 │   │   │   │   ├── AddWidgetHandler.php
 │   │   │   │   └── RemoveWidgetHandler.php
 │   │   │   └── DTO/
-│   │   │       └── AddWidgetResult.php
+│   │   │   │   ├── AddWidgetResult.php
+│   │   │   │   └── MoveWidgetResult.php
+│   │   │   └── Service/
+│   │   │       └── ShoppingListPdfGenerator.php
 │   │   └── Identity/
 │   │       ├── Command/
 │   │       │   ├── LoginUserCommand.php
@@ -705,9 +706,13 @@ mmm/
 │   ├── Infrastructure/          # Implémentations techniques
 │   │   ├── Doctrine/
 │   │   │   └── Repository/
-│   │   │       ├── UserRepository.php
-│   │   │       ├── DashboardRepository.php
-│   │   │       └── TwoFactorCodeRepository.php
+│   │   │   │   ├── UserRepository.php 
+│   │   │   │   ├── DashboardRepository.php
+│   │   │   │   ├── LoginAttemptRepository.php
+│   │   │   │   └── TwoFactorCodeRepository.php
+│   │   │   └── Api/
+│   │   │   │   ├── OpenFoodFactsService.php
+│   │   │   │   └── WidgetDataProvider.php
 │   │   ├── Security/
 │   │   │   ├── UserAdapter.php
 │   │   │   ├── UserProvider.php
@@ -715,6 +720,7 @@ mmm/
 │   │   ├── Mail/
 │   │   │   └── TwoFactorMailer.php
 │   │   └── EventSubscriber/
+│   │       ├── TwoFactorCodeSubscriber.php
 │   │       └── LoginEventSubscriber.php
 │   │
 │   └── UI/                      # Interface utilisateur
@@ -730,12 +736,12 @@ mmm/
 │       │   ├── LoginType.php
 │       │   └── TwoFactorType.php
 │       └── Command/
-│           └── CreateAdminCommand.php
 │
 ├── templates/                   # Templates Twig
 │   ├── base.html.twig
 │   ├── home/
 │   ├── login/
+│   ├── logout/
 │   ├── two_factor/
 │   ├── dashboard/
 │   ├── admin/
@@ -749,9 +755,8 @@ mmm/
 │           └── table.html.twig
 │
 ├── tests/                       # Tests (PHPUnit)
-│   ├── Domain/
-│   ├── Application/
-│   └── UI/
+│   ├── Unit/
+│   └── Functional/
 │
 ├── var/                         # Cache, logs, sessions
 │
