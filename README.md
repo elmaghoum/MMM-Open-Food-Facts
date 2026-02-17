@@ -446,9 +446,6 @@ docker compose up -d --build
 # Tests unitaires (Domain)
 docker compose exec app php bin/phpunit tests/Domain
 
-# Tests fonctionnels (UI)
-docker compose exec app php bin/phpunit tests/UI
-
 # Tous les tests
 docker compose exec app php bin/phpunit
 
@@ -459,7 +456,7 @@ docker compose exec app php bin/phpunit --coverage-html var/coverage
 ### Structure des tests
 ```
 tests/
-├── Domain/
+└── Domain/
    ├── Dashboard/
    │   └── Entity/
    │       ├── DashboardTest.php
